@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ganttris - v0.0.13</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #1e1e2e; 
+            color: #f8f8f2; 
+        }
+        .toolbar { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            background: #2e2e3e; 
+            color: #f8f8f2;
+        }
+        .toolbar-item {
+            padding: 10px 20px;
+            background: #0078d4;  /* Stronger blue (more contrast) */
+            color: #ffffff;       /* White text for contrast */
+            border: 1px solid #005a9e; /* Slightly darker border */
+            cursor: grab;
+        }
+        .timeline { 
+            position: relative; 
+            background: #282a36; 
+            border: 1px solid #44475a; 
+            min-height: 400px; 
+            overflow-x: auto; 
+        }
+        .epic {
+            position: absolute;
+            color: #ffffff;       /* White text for contrast */
+            padding: 5px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            cursor: grab;
+            border: 1px solid #44475a;
+        }
+        .resize-handle, .resize-handle-vertical { background: rgba(255,255,255,0.5); }
+        .resize-handle { 
+            position: absolute; 
+            right: 0; 
+            top: 0; 
+            width: 10px; 
+            height: 100%; 
+            cursor: ew-resize; 
+        }
+        .resize-handle-vertical { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 8px; 
+            cursor: ns-resize; 
+        }
+        .resource-row { 
+            position: absolute; 
+            width: 100%; 
+            height: 50px; 
+        }
+        .resource-row:nth-child(odd) { background: rgba(255, 255, 255, 0.05); }
+        .resource-row:nth-child(even) { background: rgba(255, 255, 255, 0.08); }
+        .highlight { box-shadow: inset 0 -3px 0 darkred; }
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #D32F2F; /* WCAG-compliant red */
+            color: #ffffff;     /* High contrast white */
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sprint-border { 
+            position: absolute; 
+            top: 0; 
+            width: 1px; 
+            height: 100%; 
+            background: #6272a4; 
+        }
+    </style>
+</head>
+<body>
+
+<h1>Ganttris - v0.0.13</h1>
+
+<label>
+    Number of Resources:
+    <input type="number" id="highlightRowInput" value="1" min="1" max="20">
+</label>
+
+<div class="toolbar">
+    <div class="toolbar-item" draggable="true" data-type="epic">&#43; Epic</div>
+</div>
+
+<div class="timeline" id="timeline">
+    <div class="timeline-grid"></div>
+</div>
+
+<button onclick="clearTimeline()">Clear Timeline</button>
+
+<script>
+let projectData = JSON.parse(localStorage.getItem('projectData')) || [];
+const rowHeight = 50;
+const sprintWidth = 60;
+const colors = ['#1a73e8', '#34a853', '#6B8E23', '#009688', '#9c27b0', '#4682B4'];
+
+let highlightRow = parseInt(localStorage.getItem('highlightRow')) || 1;
+document.getElementById('highlightRowInput').value = highlightRow;
+
+document.getElementById('highlightRowInput').addEventListener('input', (e) => {
+    highlightRow = parseInt(e.target.value) || 1;
+    localStorage.setItem('highlightRow', highlightRow);
+    render();
+});
+
+document.querySelector('.toolbar-item').addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('type', 'epic');
+});
+
+timeline.addEventListener('dragover', (e) => e.preventDefault());
+
+timeline.addEventListener('drop', (e) => {
+    if (e.dataTransfer.getData('type') === 'epic') {
+        const left = snapToGrid(e.clientX - timeline.getBoundingClientRect().left);
+        const top = snapToRow(projectData.length * rowHeight);
+        const color = colors[projectData.length % colors.length];
+
+        if (checkOverlap(null, left, top, sprintWidth * 3)) {
+            alert("Cannot place Epic here - overlaps with existing Epic.");
+            return;
+        }
+
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: sprintWidth * 3, resourceCount : 1, color });
+        saveAndRender();
+    }
+});
+
+function saveAndRender() {
+    localStorage.setItem('projectData', JSON.stringify(projectData));
+    render();
+}
+
+function clearTimeline() {
+    projectData = [];
+    saveAndRender();
+}
+
+function snapToGrid(value) {
+    return Math.round(value / sprintWidth) * sprintWidth;
+}
+
+function snapToRow(value) {
+    return Math.round(value / rowHeight) * rowHeight;
+}
+
+function render() {
+    timeline.innerHTML = '<div class="timeline-grid"></div>';
+    drawResourceRows();
+    projectData.forEach(epic => timeline.appendChild(createEpicElement(epic)));
+    drawSprintGrid();
+}
+
+function drawResourceRows() {
+    for (let i = 0; i < 20; i++) {
+        const row = document.createElement('div');
+        row.className = 'resource-row';
+        row.style.top = `${i * rowHeight}px`;
+        if (i === highlightRow - 1) row.classList.add('highlight');
+        timeline.appendChild(row);
+    }
+}
+
+function createEpicElement(epic) {
+    const epicEl = document.createElement('div');
+    epicEl.className = 'epic';
+    epicEl.style.backgroundColor = epic.color;
+    epicEl.style.top = `${epic.top}px`;
+    epicEl.style.left = `${epic.left}px`;
+    epicEl.style.width = `${epic.width}px`;
+    epicEl.style.height = `${epic.resourceCount * rowHeight}px`;
+
+    epicEl.innerHTML = `
+        <div style="cursor: text; font-weight: bold;" onclick="startEditingEpicName(${epic.id})">${epic.name}</div>
+        <div class="resize-handle"></div>
+        <div class="resize-handle-vertical"></div>
+        <div style="position:absolute;bottom:2px;right:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.width / sprintWidth} Sprints</div>
+        <div style="position:absolute;bottom:2px;left:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.resourceCount} Res</div>
+    `;
+    makeDraggable(epicEl, epic);
+    return epicEl;
+}
+
+function startEditingEpicName(epicId) {
+    const epic = projectData.find(e => e.id === epicId);
+    const newName = prompt("Edit Epic Name:", epic.name);
+    if (newName !== null) {
+        epic.name = newName.trim();
+        saveAndRender();
+    }
+}
+
+function makeDraggable(element, epic) {
+    element.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('resize-handle')) startResizing(e, epic);
+        else if (e.target.classList.contains('resize-handle-vertical')) startVerticalResizing(e, epic);
+        else startDragging(e, epic);
+    });
+}
+
+function startDragging(e, epic) {
+    const offsetX = e.clientX - e.target.getBoundingClientRect().left;
+    const offsetY = e.clientY - e.target.getBoundingClientRect().top;
+
+    document.onmousemove = (e) => {
+        const newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
+        const newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
+
+        if (!checkOverlap(epic, newLeft, newTop, epic.width, epic.resourceCount)) {
+            epic.left = newLeft;
+            epic.top = newTop;
+            saveAndRender();
+        }
+    };
+    document.onmouseup = () => document.onmousemove = null;
+}
+
+function startResizing(e, epic) {
+    const startX = e.clientX;
+    const initialWidth = epic.width;
+
+    document.onmousemove = (e) => {
+        const newWidth = snapToGrid(Math.max(sprintWidth, initialWidth + (e.clientX - startX)));
+
+        if (!checkOverlap(epic, epic.left, epic.top, newWidth, epic.resourceCount)) {
+            epic.width = newWidth;
+            saveAndRender();
+        }
+    };
+
+    document.onmouseup = () => document.onmousemove = null;
+    e.stopPropagation();
+}
+
+function startVerticalResizing(e, epic) {
+    const startY = e.clientY;
+    const initialHeight = epic.resourceCount * rowHeight;
+
+    document.onmousemove = (e) => {
+        const newHeight = Math.max(rowHeight, initialHeight + (e.clientY - startY));
+        epic.resourceCount = Math.round(newHeight / rowHeight);
+        saveAndRender();
+    };
+
+    document.onmouseup = () => document.onmousemove = null;
+    e.stopPropagation();
+}
+
+function checkOverlap(currentEpic, left, top, width = currentEpic?.width, resourceCount = currentEpic?.resourceCount) {
+    return projectData.some(epic =>
+        epic.id !== currentEpic?.id &&
+        (
+            (epic.top === top && epic.left < left + width && epic.left + epic.width > left) || 
+            (top < epic.top + (epic.resourceCount * rowHeight) &&
+             top + (resourceCount * rowHeight) > epic.top &&
+             epic.left < left + width &&
+             epic.left + epic.width > left)
+        )
+    );
+}
+
+function drawSprintGrid() {
+    const grid = document.querySelector('.timeline-grid');
+    grid.innerHTML = '';
+    const gridWidth = timeline.scrollWidth;
+    const gridHeight = timeline.scrollHeight;  // Ensure it spans the full height including scroll area
+
+    for (let x = 0; x < gridWidth; x += sprintWidth) {
+        if (x > 0 && (x / sprintWidth) % 6 === 0) {
+            const border = document.createElement('div');
+            border.className = 'sprint-border';
+            border.style.left = `${x}px`;
+            border.style.height = `${gridHeight}px`;  // Make the border span full height
+            grid.appendChild(border);
+        }
+    }
+}
+
+
+saveAndRender();
+</script>
+
+</body>
+</html>
