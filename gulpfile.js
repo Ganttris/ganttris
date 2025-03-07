@@ -9,6 +9,8 @@ const fs = require('fs');
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
 const replace = require('gulp-replace');
 const packageJson = require('./package.json');
+const htmlReplace = require('gulp-html-replace');
+const obfuscator = require('gulp-javascript-obfuscator');
 
 // Minify and concatenate CSS
 gulp.task('minify-css', () => {
@@ -69,8 +71,25 @@ gulp.task('create-cname', (done) => {
     done();
 });
 
+// Cache busting
+gulp.task('cache-bust', function () {
+    const timestamp = new Date().getTime();
+    return gulp.src('src/index.html')
+        .pipe(htmlReplace({
+            'css': `styles/style.css?v=${timestamp}`,
+            'js': `scripts/script.js?v=${timestamp}`
+        }))
+        .pipe(gulp.dest('dist'));
+});
+
+// Build task
+gulp.task('build', gulp.series('cache-bust', function () {
+    return gulp.src('src/**/*')
+        .pipe(gulp.dest('dist'));
+}));
+
 // Default task
-gulp.task('default', gulp.series('minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', 'create-cname', (done) => {
+gulp.task('default', gulp.series('build', 'minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', 'create-cname', (done) => {
     console.log('Build process completed.');
     done();
 }));
