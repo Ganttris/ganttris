@@ -1,6 +1,6 @@
 {
   "name": "ganttris",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "description": "A project for managing tasks and resources visually using a Gantt chart interface.",
   "main": "src/index.html",
   "scripts": {
@@ -25,6 +25,7 @@
     "gulp-html-replace": "^1.6.2",
     "gulp-inject": "^5.0.5",
     "gulp-javascript-obfuscator": "^1.1.6",
+    "gulp-replace": "^1.0.0",
     "live-server": "^1.2.0"
   },
   "author": "Joe Bader",

@@ -1,3 +1,5 @@
+// inject:hostname-check
+
 let projectData = JSON.parse(localStorage.getItem('projectData')) || [];
 const rowHeight = 50;
 const sprintWidth = 60;
