@@ -116,8 +116,14 @@ function startDragging(e, epic) {
     const offsetY = e.clientY - e.target.getBoundingClientRect().top;
 
     document.onmousemove = (e) => {
-        const newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
-        const newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
+        let newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
+        let newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
+
+        // Prevent dragging beyond the left bound
+        if (newLeft < 0) newLeft = 0;
+
+        // Prevent dragging beyond the top bound
+        if (newTop < 0) newTop = 0;
 
         if (!checkOverlap(epic, newLeft, newTop, epic.width * sprintWidth, epic.resourceCount * rowHeight)) {
             epic.left = newLeft;
