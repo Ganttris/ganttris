@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ganttris - v0.0.13</title>
+    <!-- inject:css -->
+    <link rel="stylesheet" href="styles/style.css">
+    <!-- endinject -->
+</head>
+<body>
+
+<h1>Ganttris - v0.0.13</h1>
+
+<label>
+    Number of Resources:
+    <input type="number" id="highlightRowInput" value="1" min="1" max="20">
+</label>
+
+<div class="toolbar">
+    <div class="toolbar-item" draggable="true" data-type="epic">&#43; Epic</div>
+</div>
+
+<div class="timeline" id="timeline">
+    <div class="timeline-grid"></div>
+</div>
+
+<button onclick="clearTimeline()">Clear Timeline</button>
+
+<!-- inject:js -->
+<script src="scripts/script.js"></script>
+<!-- endinject -->
+
+</body>
+</html>
