@@ -2,7 +2,7 @@
 
 let projectData = JSON.parse(localStorage.getItem('projectData')) || [];
 const rowHeight = 50;
-const sprintWidth = 60;
+const sprintWidth = 120; // Updated sprint width
 const colors = ['#1a73e8', '#34a853', '#6B8E23', '#009688', '#9c27b0', '#4682B4'];
 
 let highlightRow = parseInt(localStorage.getItem('highlightRow')) || 1;
@@ -31,7 +31,7 @@ timeline.addEventListener('drop', (e) => {
             return;
         }
 
-        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: sprintWidth * 3, resourceCount : 1, color });
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 3, resourceCount: 1, color }); // Store width in sprints
         saveAndRender();
     }
 });
@@ -77,14 +77,14 @@ function createEpicElement(epic) {
     epicEl.style.backgroundColor = epic.color;
     epicEl.style.top = `${epic.top}px`;
     epicEl.style.left = `${epic.left}px`;
-    epicEl.style.width = `${epic.width}px`;
+    epicEl.style.width = `${epic.width * sprintWidth}px`; // Convert width from sprints to pixels
     epicEl.style.height = `${epic.resourceCount * rowHeight}px`;
 
     epicEl.innerHTML = `
         <div style="cursor: text; font-weight: bold;" onclick="startEditingEpicName(${epic.id})">${epic.name}</div>
         <div class="resize-handle"></div>
         <div class="resize-handle-vertical"></div>
-        <div style="position:absolute;bottom:2px;right:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.width / sprintWidth} Sprints</div>
+        <div style="position:absolute;bottom:2px;right:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.width} Sprints</div>
         <div style="position:absolute;bottom:2px;left:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.resourceCount} Res</div>
     `;
     makeDraggable(epicEl, epic);
@@ -127,13 +127,13 @@ function startDragging(e, epic) {
 
 function startResizing(e, epic) {
     const startX = e.clientX;
-    const initialWidth = epic.width;
+    const initialWidth = epic.width * sprintWidth;
 
     document.onmousemove = (e) => {
         const newWidth = snapToGrid(Math.max(sprintWidth, initialWidth + (e.clientX - startX)));
 
         if (!checkOverlap(epic, epic.left, epic.top, newWidth, epic.resourceCount)) {
-            epic.width = newWidth;
+            epic.width = newWidth / sprintWidth; // Store width in sprints
             saveAndRender();
         }
     };
@@ -156,15 +156,15 @@ function startVerticalResizing(e, epic) {
     e.stopPropagation();
 }
 
-function checkOverlap(currentEpic, left, top, width = currentEpic?.width, resourceCount = currentEpic?.resourceCount) {
+function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, resourceCount = currentEpic?.resourceCount) {
     return projectData.some(epic =>
         epic.id !== currentEpic?.id &&
         (
-            (epic.top === top && epic.left < left + width && epic.left + epic.width > left) || 
+            (epic.top === top && epic.left < left + width && epic.left + epic.width * sprintWidth > left) || 
             (top < epic.top + (epic.resourceCount * rowHeight) &&
              top + (resourceCount * rowHeight) > epic.top &&
              epic.left < left + width &&
-             epic.left + epic.width > left)
+             epic.left + epic.width * sprintWidth > left)
         )
     );
 }
