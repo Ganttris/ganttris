@@ -86,8 +86,8 @@ function createEpicElement(epic) {
         <div style="cursor: text; font-weight: bold;" onclick="startEditingEpicName(${epic.id})">${epic.name}</div>
         <div class="resize-handle"></div>
         <div class="resize-handle-vertical"></div>
-        <div style="position:absolute;bottom:2px;right:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.width} Sprints</div>
-        <div style="position:absolute;bottom:2px;left:4px;background:#444;color:#ffffff;padding:2px 4px;border-radius:3px;font-size:12px;">${epic.resourceCount} Res</div>
+        <div class="epic-label">${epic.width} Sprints</div>
+        <div class="epic-resource-label">${epic.resourceCount} Res</div>
     `;
     makeDraggable(epicEl, epic);
     return epicEl;
