@@ -5,6 +5,7 @@ const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const concat = require('gulp-concat');
 const inject = require('gulp-inject');
+const fs = require('fs');
 
 // Minify and concatenate CSS
 gulp.task('minify-css', () => {
@@ -43,8 +44,15 @@ gulp.task('copy-assets', () => {
         .pipe(gulp.dest('dist/assets'));
 });
 
+// Create .nojekyll file
+gulp.task('create-nojekyll', (done) => {
+    console.log('Creating .nojekyll file...');
+    fs.writeFileSync('dist/.nojekyll', '');
+    done();
+});
+
 // Default task
-gulp.task('default', gulp.series('minify-css', 'minify-js', 'minify-html', 'copy-assets', (done) => {
+gulp.task('default', gulp.series('minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', (done) => {
     console.log('Build process completed.');
     done();
 }));
