@@ -117,3 +117,16 @@ button {
     overflow: hidden; /* Hide overflow text */
     text-overflow: ellipsis; /* Add ellipsis for overflow text */
 }
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background: #282a36;
+    color: #f8f8f2;
+    position: fixed;
+    bottom: 0;
+    left: 0; /* Ensure the footer starts from the left edge */
+    right: 0; /* Ensure the footer ends at the right edge */
+    width: 100%; /* Ensure the footer takes up the full width */
+    border-top: 1px solid #44475a;
+}
