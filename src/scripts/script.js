@@ -116,7 +116,7 @@ function startDragging(e, epic) {
         const newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
         const newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
 
-        if (!checkOverlap(epic, newLeft, newTop, epic.width, epic.resourceCount)) {
+        if (!checkOverlap(epic, newLeft, newTop, epic.width * sprintWidth, epic.resourceCount * rowHeight)) {
             epic.left = newLeft;
             epic.top = newTop;
             saveAndRender();
@@ -156,15 +156,14 @@ function startVerticalResizing(e, epic) {
     e.stopPropagation();
 }
 
-function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, resourceCount = currentEpic?.resourceCount) {
+function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, height = currentEpic?.resourceCount * rowHeight) {
     return projectData.some(epic =>
         epic.id !== currentEpic?.id &&
         (
-            (epic.top === top && epic.left < left + width && epic.left + epic.width * sprintWidth > left) || 
             (top < epic.top + (epic.resourceCount * rowHeight) &&
-             top + (resourceCount * rowHeight) > epic.top &&
-             epic.left < left + width &&
-             epic.left + epic.width * sprintWidth > left)
+             top + height > epic.top &&
+             left < epic.left + (epic.width * sprintWidth) &&
+             left + width > epic.left)
         )
     );
 }
