@@ -25,7 +25,9 @@ body {
     background: #282a36; 
     border: 1px solid #44475a; 
     min-height: 400px; 
-    overflow-x: auto; 
+    overflow-x: auto; /* Make the timeline horizontally scrollable */
+    white-space: nowrap; /* Prevent wrapping of content */
+    width: 100%; /* Match the width of the browser */
 }
 .epic {
     position: absolute;
@@ -55,8 +57,8 @@ body {
 }
 .resource-row { 
     position: absolute; 
-    width: 100%; 
     height: 50px; 
+    width: 100%; /* Ensure the row spans the full width */
 }
 .resource-row:nth-child(odd) { background: rgba(255, 255, 255, 0.05); }
 .resource-row:nth-child(even) { background: rgba(255, 255, 255, 0.08); }

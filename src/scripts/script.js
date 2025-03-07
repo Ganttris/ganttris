@@ -62,10 +62,12 @@ function render() {
 }
 
 function drawResourceRows() {
+    const timelineWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
     for (let i = 0; i < 20; i++) {
         const row = document.createElement('div');
         row.className = 'resource-row';
         row.style.top = `${i * rowHeight}px`;
+        row.style.width = `${timelineWidth}px`; // Set the width to match the total width of the timeline
         if (i === highlightRow - 1) row.classList.add('highlight');
         timeline.appendChild(row);
     }
@@ -171,7 +173,7 @@ function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprin
 function drawSprintGrid() {
     const grid = document.querySelector('.timeline-grid');
     grid.innerHTML = '';
-    const gridWidth = timeline.scrollWidth;
+    const gridWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
     const gridHeight = timeline.scrollHeight;  // Ensure it spans the full height including scroll area
 
     for (let x = 0; x < gridWidth; x += sprintWidth) {
