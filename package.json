@@ -1,6 +1,6 @@
 {
   "name": "ganttris",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "A project for managing tasks and resources visually using a Gantt chart interface.",
   "main": "src/index.html",
   "scripts": {
