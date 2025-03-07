@@ -20,6 +20,7 @@
     "gh-pages": "^6.3.0",
     "gulp-html-replace": "^1.6.2",
     "gulp-inject": "^5.0.5",
+    "gulp-javascript-obfuscator": "^1.1.6",
     "live-server": "^1.2.0"
   },
   "author": "Joe Bader",

@@ -6,6 +6,7 @@ const rename = require('gulp-rename');
 const concat = require('gulp-concat');
 const inject = require('gulp-inject');
 const fs = require('fs');
+const javascriptObfuscator = require('gulp-javascript-obfuscator');
 
 // Minify and concatenate CSS
 gulp.task('minify-css', () => {
@@ -16,11 +17,12 @@ gulp.task('minify-css', () => {
         .pipe(gulp.dest('dist/styles'));
 });
 
-// Minify and concatenate JS
+// Minify, obfuscate, and concatenate JS
 gulp.task('minify-js', () => {
-    console.log('Minifying JS...');
+    console.log('Minifying and obfuscating JS...');
     return gulp.src('src/scripts/*.js')
         .pipe(uglify())
+        .pipe(javascriptObfuscator())
         .pipe(concat('script.min.js'))
         .pipe(gulp.dest('dist/scripts'));
 });
@@ -51,8 +53,15 @@ gulp.task('create-nojekyll', (done) => {
     done();
 });
 
+// Create CNAME file
+gulp.task('create-cname', (done) => {
+    console.log('Creating CNAME file...');
+    fs.writeFileSync('dist/CNAME', 'ganttris.com'); // Replace with your custom domain
+    done();
+});
+
 // Default task
-gulp.task('default', gulp.series('minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', (done) => {
+gulp.task('default', gulp.series('minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', 'create-cname', (done) => {
     console.log('Build process completed.');
     done();
 }));
