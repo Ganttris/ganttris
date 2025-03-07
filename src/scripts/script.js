@@ -43,7 +43,16 @@ function saveAndRender() {
 
 function clearTimeline() {
     projectData = [];
+    localStorage.removeItem('pageTitle'); // Clear the project title
     saveAndRender();
+    // Reset the effort toggle to "Unlocked"
+    isLockAreaEnabled = false;
+    localStorage.setItem('isLockAreaEnabled', JSON.stringify(isLockAreaEnabled));
+    updateLockAreaToggle();
+    // Reset the project title
+    const pageTitleElement = document.getElementById('page-title');
+    pageTitleElement.innerText = "My Project";
+    pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
 }
 
 function snapToGrid(value) {
@@ -137,13 +146,26 @@ function startDragging(e, epic) {
 function startResizing(e, epic) {
     const startX = e.clientX;
     const initialWidth = epic.width * sprintWidth;
+    const initialHeight = epic.resourceCount * rowHeight;
 
     document.onmousemove = (e) => {
         const newWidth = snapToGrid(Math.max(sprintWidth, initialWidth + (e.clientX - startX)));
+        const newEpicWidth = Math.round(newWidth / sprintWidth); // Store width in whole sprints
 
-        if (!checkOverlap(epic, epic.left, epic.top, newWidth, epic.resourceCount)) {
-            epic.width = newWidth / sprintWidth; // Store width in sprints
-            saveAndRender();
+        if (isLockAreaEnabled) {
+            const totalCells = (initialHeight / rowHeight) * (initialWidth / sprintWidth);
+            const newResourceCount = Math.round(totalCells / newEpicWidth); // Adjust resource count to whole numbers
+
+            if (!checkOverlap(epic, epic.left, epic.top, newEpicWidth * sprintWidth, newResourceCount * rowHeight)) {
+                epic.width = newEpicWidth;
+                epic.resourceCount = newResourceCount;
+                saveAndRender();
+            }
+        } else {
+            if (!checkOverlap(epic, epic.left, epic.top, newEpicWidth * sprintWidth, epic.resourceCount * rowHeight)) {
+                epic.width = newEpicWidth;
+                saveAndRender();
+            }
         }
     };
 
@@ -151,14 +173,57 @@ function startResizing(e, epic) {
     e.stopPropagation();
 }
 
+let isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
+
+function toggleLockArea() {
+    isLockAreaEnabled = !isLockAreaEnabled;
+    localStorage.setItem('isLockAreaEnabled', JSON.stringify(isLockAreaEnabled));
+    updateLockAreaToggle();
+}
+
+function updateLockAreaToggle() {
+    const lockAreaToggle = document.getElementById('lock-effort-toggle');
+    const icon = lockAreaToggle.querySelector('i');
+    if (isLockAreaEnabled) {
+        lockAreaToggle.classList.add('locked');
+        icon.classList.remove('fa-lock-open');
+        icon.classList.add('fa-lock');
+        lockAreaToggle.innerHTML = '<i class="fas fa-lock"></i> Effort Locked';
+    } else {
+        lockAreaToggle.classList.remove('locked');
+        icon.classList.remove('fa-lock');
+        icon.classList.add('fa-lock-open');
+        lockAreaToggle.innerHTML = '<i class="fas fa-lock-open"></i> Effort Unlocked';
+    }
+}
+
+// Call updateLockAreaToggle on page load to set the initial state
+updateLockAreaToggle();
+
 function startVerticalResizing(e, epic) {
     const startY = e.clientY;
     const initialHeight = epic.resourceCount * rowHeight;
+    const initialWidth = epic.width * sprintWidth;
 
     document.onmousemove = (e) => {
-        const newHeight = Math.max(rowHeight, initialHeight + (e.clientY - startY));
-        epic.resourceCount = Math.round(newHeight / rowHeight);
-        saveAndRender();
+        const newHeight = snapToRow(Math.max(rowHeight, initialHeight + (e.clientY - startY)));
+        const newResourceCount = Math.round(newHeight / rowHeight); // Store resource count in whole numbers
+
+        if (isLockAreaEnabled) {
+            const totalCells = (initialHeight / rowHeight) * (initialWidth / sprintWidth);
+            const newEpicWidth = Math.round(totalCells / newResourceCount); // Adjust width to whole sprints
+
+            if (!checkOverlap(epic, epic.left, epic.top, newEpicWidth * sprintWidth, newResourceCount * rowHeight)) {
+                epic.width = newEpicWidth;
+                epic.resourceCount = newResourceCount;
+                saveAndRender();
+            }
+        } else {
+            if (!checkOverlap(epic, epic.left, epic.top, epic.width * sprintWidth, newResourceCount * rowHeight)) {
+                epic.resourceCount = newResourceCount;
+                saveAndRender();
+            }
+        }
     };
 
     document.onmouseup = () => document.onmousemove = null;
@@ -227,7 +292,12 @@ pageTitleElement.addEventListener('input', (e) => {
 
 // Function to download project data
 function downloadData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
+    const data = {
+        projectData,
+        pageTitle: localStorage.getItem('pageTitle'),
+        isLockAreaEnabled: JSON.parse(localStorage.getItem('isLockAreaEnabled'))
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "projectData.gntt");
@@ -242,9 +312,24 @@ function uploadData(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const contents = e.target.result;
-            projectData = JSON.parse(contents);
+            const data = JSON.parse(e.target.result);
+            projectData = data.projectData || [];
+            localStorage.setItem('pageTitle', data.pageTitle || "My Project");
+            localStorage.setItem('isLockAreaEnabled', JSON.stringify(data.isLockAreaEnabled || false));
             saveAndRender();
+            // Update the project title
+            const pageTitleElement = document.getElementById('page-title');
+            const savedTitle = localStorage.getItem('pageTitle');
+            if (savedTitle && savedTitle !== "My Project") {
+                pageTitleElement.innerText = savedTitle;
+                pageTitleElement.style.color = ''; // Reset to default color
+            } else {
+                pageTitleElement.innerText = "My Project";
+                pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+            }
+            // Update the effort toggle
+            isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
+            updateLockAreaToggle();
         };
         reader.readAsText(file);
     }

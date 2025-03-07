@@ -20,11 +20,14 @@ body {
     background: #0078d4;  /* Stronger blue (more contrast) */
     color: #ffffff;       /* White text for contrast */
     border: 1px solid #005a9e; /* Slightly darker border */
-    cursor: grab;
 }
 
-.toolbar-item:hover {
-    cursor: grab; /* Change cursor to grab on hover */
+.toolbar-item.btn-epic {
+    cursor: grab; /* Apply grab cursor only to the epic button */
+}
+
+.toolbar-item.btn-epic:hover {
+    cursor: grab; /* Change cursor to grab on hover for the epic button */
 }
 
 .timeline { 
@@ -153,6 +156,17 @@ button {
 
 .btn-epic {
     background-color: #0078d4; /* Blue */
+}
+
+.btn-lock {
+    background-color: #ff9800; /* Orange */
+    width: 150px; /* Fixed width */
+    text-align: center; /* Center text */
+    cursor: pointer; /* Standard button cursor */
+}
+
+.btn-lock.locked {
+    background-color: #4caf50; /* Green */
 }
 
 .btn i {
