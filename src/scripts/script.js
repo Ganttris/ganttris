@@ -63,7 +63,7 @@ function render() {
 
 function drawResourceRows() {
     const timelineWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 50; i++) { // Set the total number of resource rows to 50
         const row = document.createElement('div');
         row.className = 'resource-row';
         row.style.top = `${i * rowHeight}px`;
@@ -174,7 +174,7 @@ function drawSprintGrid() {
     const grid = document.querySelector('.timeline-grid');
     grid.innerHTML = '';
     const gridWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
-    const gridHeight = timeline.scrollHeight;  // Ensure it spans the full height including scroll area
+    const gridHeight = 50 * rowHeight;  // Set the grid height to match 50 resources
 
     for (let x = 0; x < gridWidth; x += sprintWidth) {
         if (x > 0 && (x / sprintWidth) % 6 === 0) {

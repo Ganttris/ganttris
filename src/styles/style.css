@@ -5,6 +5,7 @@ body {
     background: #1e1e2e; 
     color: #f8f8f2; 
 }
+
 .toolbar { 
     display: flex; 
     gap: 10px; 
@@ -13,6 +14,7 @@ body {
     background: #2e2e3e; 
     color: #f8f8f2;
 }
+
 .toolbar-item {
     padding: 10px 20px;
     background: #0078d4;  /* Stronger blue (more contrast) */
@@ -20,15 +22,18 @@ body {
     border: 1px solid #005a9e; /* Slightly darker border */
     cursor: grab;
 }
+
 .timeline { 
     position: relative; 
     background: #282a36; 
     border: 1px solid #44475a; 
-    min-height: 400px; 
+    height: calc(500px + 17px); /* Set the height to 10 resources tall (10 * 50px) plus scrollbar height */
     overflow-x: auto; /* Make the timeline horizontally scrollable */
+    overflow-y: auto; /* Make the timeline vertically scrollable */
     white-space: nowrap; /* Prevent wrapping of content */
     width: 100%; /* Match the width of the browser */
 }
+
 .epic {
     position: absolute;
     color: #ffffff;       /* White text for contrast */
@@ -38,7 +43,9 @@ body {
     cursor: grab;
     border: 1px solid #44475a;
 }
+
 .resize-handle, .resize-handle-vertical { background: rgba(255,255,255,0.5); }
+
 .resize-handle { 
     position: absolute; 
     right: 0; 
@@ -47,6 +54,7 @@ body {
     height: 100%; 
     cursor: ew-resize; 
 }
+
 .resize-handle-vertical { 
     position: absolute; 
     bottom: 0; 
@@ -55,14 +63,19 @@ body {
     height: 8px; 
     cursor: ns-resize; 
 }
+
 .resource-row { 
     position: absolute; 
     height: 50px; 
     width: 100%; /* Ensure the row spans the full width */
 }
+
 .resource-row:nth-child(odd) { background: rgba(255, 255, 255, 0.05); }
+
 .resource-row:nth-child(even) { background: rgba(255, 255, 255, 0.08); }
+
 .highlight { box-shadow: inset 0 -3px 0 darkred; }
+
 button {
     margin-top: 10px;
     padding: 8px 16px;
@@ -72,6 +85,7 @@ button {
     cursor: pointer;
     font-weight: bold;
 }
+
 .sprint-border { 
     position: absolute; 
     top: 0; 
