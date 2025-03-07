@@ -108,3 +108,10 @@ button {
 .btn i {
     margin-right: 5px;
 }
+
+#page-title {
+    color: #f8f8f2; /* Default color */
+    white-space: nowrap; /* Ensure the title is only one line */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+}

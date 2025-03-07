@@ -187,13 +187,33 @@ function drawSprintGrid() {
 
 // Load the saved title from local storage
 const savedTitle = localStorage.getItem('pageTitle');
-if (savedTitle) {
-    document.getElementById('page-title').innerText = savedTitle;
+const pageTitleElement = document.getElementById('page-title');
+if (savedTitle && savedTitle !== "My Project") {
+    pageTitleElement.innerText = savedTitle;
+    pageTitleElement.style.color = ''; // Reset to default color
+} else {
+    pageTitleElement.innerText = "My Project";
+    pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
 }
 
+// Prevent the title from expanding vertically when hitting "Enter"
+pageTitleElement.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+    }
+});
+
 // Save the title to local storage when it is edited
-document.getElementById('page-title').addEventListener('input', (e) => {
-    localStorage.setItem('pageTitle', e.target.innerText);
+pageTitleElement.addEventListener('input', (e) => {
+    const title = e.target.innerText.trim();
+    if (title && title !== "My Project") {
+        localStorage.setItem('pageTitle', title);
+        pageTitleElement.style.color = ''; // Reset to default color
+    } else {
+        pageTitleElement.innerText = "My Project";
+        pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+        localStorage.setItem('pageTitle', "My Project");
+    }
 });
 
 // Function to download project data
