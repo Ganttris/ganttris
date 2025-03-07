@@ -8,6 +8,10 @@
     "start": "live-server",
     "deploy": "gh-pages -d dist"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ganttris/ganttris.git"
+  },
   "dependencies": {
     "gulp": "^5.0.0",
     "gulp-concat": "^2.6.1",
