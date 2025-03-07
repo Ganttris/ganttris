@@ -23,6 +23,10 @@ body {
     cursor: grab;
 }
 
+.toolbar-item:hover {
+    cursor: grab; /* Change cursor to grab on hover */
+}
+
 .timeline { 
     position: relative; 
     background: #282a36; 
