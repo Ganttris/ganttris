@@ -46,6 +46,10 @@ body {
     border-radius: 5px;
     cursor: grab;
     border: 1px solid #44475a;
+    user-select: none; /* Prevent text selection */
+    -webkit-user-select: none; /* Prevent text selection in Safari */
+    -moz-user-select: none; /* Prevent text selection in Firefox */
+    -ms-user-select: none; /* Prevent text selection in IE */
 }
 
 .resize-handle, .resize-handle-vertical { background: rgba(255,255,255,0.5); }

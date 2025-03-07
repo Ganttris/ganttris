@@ -111,6 +111,7 @@ function makeDraggable(element, epic) {
 }
 
 function startDragging(e, epic) {
+    e.preventDefault(); // Prevent text selection
     const offsetX = e.clientX - e.target.getBoundingClientRect().left;
     const offsetY = e.clientY - e.target.getBoundingClientRect().top;
 
