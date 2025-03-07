@@ -77,3 +77,34 @@ button {
     height: 100%; 
     background: #6272a4; 
 }
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.btn-clear {
+    background-color: #D32F2F; /* Red */
+}
+
+.btn-download {
+    background-color: #4CAF50; /* Green */
+}
+
+.btn-upload {
+    background-color: #2196F3; /* Blue */
+}
+
+.btn-epic {
+    background-color: #0078d4; /* Blue */
+}
+
+.btn i {
+    margin-right: 5px;
+}

@@ -197,4 +197,29 @@ document.getElementById('page-title').addEventListener('input', (e) => {
     localStorage.setItem('pageTitle', e.target.innerText);
 });
 
+// Function to download project data
+function downloadData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "projectData.gntt");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+// Function to upload project data
+function uploadData(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const contents = e.target.result;
+            projectData = JSON.parse(contents);
+            saveAndRender();
+        };
+        reader.readAsText(file);
+    }
+}
+
 saveAndRender();
