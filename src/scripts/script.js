@@ -186,4 +186,15 @@ function drawSprintGrid() {
     }
 }
 
+// Load the saved title from local storage
+const savedTitle = localStorage.getItem('pageTitle');
+if (savedTitle) {
+    document.getElementById('page-title').innerText = savedTitle;
+}
+
+// Save the title to local storage when it is edited
+document.getElementById('page-title').addEventListener('input', (e) => {
+    localStorage.setItem('pageTitle', e.target.innerText);
+});
+
 saveAndRender();
