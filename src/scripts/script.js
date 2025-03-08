@@ -77,14 +77,14 @@ function drawResourceRows() {
         row.className = 'resource-row';
         row.style.top = `${i * rowHeight}px`;
         row.style.width = `${timelineWidth}px`; // Set the width to match the total width of the timeline
-        if (i === highlightRow - 1) {
-            row.classList.add('highlight');
-            const resourceLine = document.createElement('div');
-            resourceLine.className = 'resource-line';
-            row.appendChild(resourceLine);
-        }
         timeline.appendChild(row);
     }
+
+    // Add the red line at the bottom of the row that corresponds to the number of resources set
+    const resourceLine = document.createElement('div');
+    resourceLine.className = 'resource-line';
+    resourceLine.style.top = `${highlightRow * rowHeight - 2}px`; // Position the line at the bottom of the row
+    timeline.appendChild(resourceLine);
 }
 
 function createEpicElement(epic) {
