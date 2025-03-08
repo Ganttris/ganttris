@@ -77,7 +77,12 @@ function drawResourceRows() {
         row.className = 'resource-row';
         row.style.top = `${i * rowHeight}px`;
         row.style.width = `${timelineWidth}px`; // Set the width to match the total width of the timeline
-        if (i === highlightRow - 1) row.classList.add('highlight');
+        if (i === highlightRow - 1) {
+            row.classList.add('highlight');
+            const resourceLine = document.createElement('div');
+            resourceLine.className = 'resource-line';
+            row.appendChild(resourceLine);
+        }
         timeline.appendChild(row);
     }
 }
@@ -95,8 +100,8 @@ function createEpicElement(epic) {
         <div style="cursor: text; font-weight: bold;" onclick="startEditingEpicName(${epic.id})">${epic.name}</div>
         <div class="resize-handle"></div>
         <div class="resize-handle-vertical"></div>
-        <div class="epic-label">${epic.width} Sprints</div>
-        <div class="epic-resource-label">${epic.resourceCount} Res</div>
+        <div class="epic-label"><i class="fas fa-clock"></i> ${epic.width}</div>
+        <div class="epic-resource-label"><i class="fas fa-users"></i> ${epic.resourceCount}</div>
     `;
     makeDraggable(epicEl, epic);
     return epicEl;
@@ -188,12 +193,12 @@ function updateLockAreaToggle() {
         lockAreaToggle.classList.add('locked');
         icon.classList.remove('fa-lock-open');
         icon.classList.add('fa-lock');
-        lockAreaToggle.innerHTML = '<i class="fas fa-lock"></i> Effort Locked';
+        lockAreaToggle.innerHTML = '<i class="fas fa-lock"></i> Effort';
     } else {
         lockAreaToggle.classList.remove('locked');
         icon.classList.remove('fa-lock');
         icon.classList.add('fa-lock-open');
-        lockAreaToggle.innerHTML = '<i class="fas fa-lock-open"></i> Effort Unlocked';
+        lockAreaToggle.innerHTML = '<i class="fas fa-lock-open"></i> Effort';
     }
 }
 
