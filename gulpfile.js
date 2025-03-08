@@ -11,6 +11,7 @@ const replace = require('gulp-replace');
 const packageJson = require('./package.json');
 const htmlReplace = require('gulp-html-replace');
 const obfuscator = require('gulp-javascript-obfuscator');
+const del = require('del');
 
 // Minify and concatenate CSS
 gulp.task('minify-css', () => {
@@ -82,11 +83,40 @@ gulp.task('cache-bust', function () {
         .pipe(gulp.dest('dist'));
 });
 
-// Build task
-gulp.task('build', gulp.series('cache-bust', function () {
-    return gulp.src('src/**/*')
+// Clean task
+gulp.task('clean', function() {
+    return del(['dist/scripts/*.js', '!dist/scripts/*.min.js', 'dist/styles/*.css', '!dist/styles/*.min.css']);
+});
+
+// Scripts task
+gulp.task('scripts', function() {
+    return gulp.src('src/scripts/**/*.js')
+        .pipe(concat('script.js'))
+        .pipe(gulp.dest('dist/scripts'))
+        .pipe(rename('script.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('dist/scripts'));
+});
+
+// Styles task
+gulp.task('styles', function() {
+    return gulp.src('src/styles/**/*.css')
+        .pipe(concat('style.css'))
+        .pipe(gulp.dest('dist/styles'))
+        .pipe(rename('style.min.css'))
+        .pipe(cssnano())
+        .pipe(gulp.dest('dist/styles'));
+});
+
+// HTML task
+gulp.task('html', function() {
+    return gulp.src('src/*.html')
+        .pipe(htmlmin({ collapseWhitespace: true }))
         .pipe(gulp.dest('dist'));
-}));
+});
+
+// Build task
+gulp.task('build', gulp.series('scripts', 'styles', 'html', 'clean'));
 
 // Default task
 gulp.task('default', gulp.series('build', 'minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', 'create-cname', (done) => {

@@ -4,7 +4,7 @@
   "description": "A project for managing tasks and resources visually using a Gantt chart interface.",
   "main": "src/index.html",
   "scripts": {
-    "build": "gulp",
+    "build": "gulp build",
     "start": "live-server --watch=src,dist",
     "deploy": "gh-pages -d dist"
   },
@@ -21,6 +21,7 @@
     "gulp-uglify": "^3.0.2"
   },
   "devDependencies": {
+    "del": "^6.0.0",
     "gh-pages": "^6.3.0",
     "gulp-html-replace": "^1.6.2",
     "gulp-inject": "^5.0.5",
