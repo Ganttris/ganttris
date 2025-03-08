@@ -206,3 +206,19 @@ footer {
     z-index: 10; /* Ensure the red line is on top of the epics */
     bottom: 0; /* Position the line at the bottom of the row */
 }
+
+.delete-epic {
+    position: absolute;
+    top: 5px;
+    right: 14px;
+    cursor: pointer;
+    background: #444; /* Dark grey background */
+    color: #fff; /* White text */
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 12px; /* Match the font size of resource and sprint counts */
+}
+
+.delete-epic:hover {
+    background: #555; /* Slightly lighter grey on hover */
+}

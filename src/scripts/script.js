@@ -102,9 +102,15 @@ function createEpicElement(epic) {
         <div class="resize-handle-vertical"></div>
         <div class="epic-label"><i class="fas fa-clock"></i> ${epic.width}</div>
         <div class="epic-resource-label"><i class="fas fa-users"></i> ${epic.resourceCount}</div>
+        <div class="delete-epic" onclick="deleteEpic(${epic.id})"><i class="fas fa-trash-alt"></i></div>
     `;
     makeDraggable(epicEl, epic);
     return epicEl;
+}
+
+function deleteEpic(epicId) {
+    projectData = projectData.filter(epic => epic.id !== epicId);
+    saveAndRender();
 }
 
 function startEditingEpicName(epicId) {
