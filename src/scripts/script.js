@@ -117,7 +117,7 @@ function startEditingEpicName(epicId) {
     const epic = projectData.find(e => e.id === epicId);
     const newName = prompt("Edit Epic Name:", epic.name);
     if (newName !== null) {
-        epic.name = newName.trim();
+        epic.name = newName.trim() || "New Epic"; // Return to default name if the name is deleted
         saveAndRender();
     }
 }
