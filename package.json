@@ -5,7 +5,7 @@
   "main": "src/index.html",
   "scripts": {
     "build": "gulp",
-    "start": "live-server",
+    "start": "live-server --watch=src,dist",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
