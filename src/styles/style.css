@@ -172,6 +172,10 @@ button {
     margin-right: 5px;
 }
 
+.btn-arrange {
+    background-color: #ff9800; 
+}
+
 #page-title {
     color: #f8f8f2; 
     white-space: nowrap; 

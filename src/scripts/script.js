@@ -405,5 +405,79 @@ function uploadData(event) {
     }
 }
 
+// Function to automatically arrange epics to minimize empty space
+function arrangeEpics() {
+    const maxResources = parseInt(document.getElementById('highlightRowInput').value) || 1;
+    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false)); // Track occupied cells
+
+    projectData.sort((a, b) => (b.resourceCount * b.width) - (a.resourceCount * a.width)); // Sort epics by size
+
+    projectData.forEach(epic => {
+        let found = false;
+
+        for (let col = 0; col < 26 && !found; col++) {
+            for (let row = 0; row < maxResources && !found; row++) {
+                if (canPlaceEpic(epic, row, col, occupied)) {
+                    placeEpic(epic, row, col, occupied);
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            alert("Cannot arrange all epics within the defined resource limit.");
+            return;
+        }
+    });
+
+    saveAndRender();
+}
+
+// Check if an epic can be placed at the specified row and column
+function canPlaceEpic(epic, row, col, occupied) {
+    for (let r = row; r < row + epic.resourceCount; r++) {
+        for (let c = col; c < col + epic.width; c++) {
+            if (r >= occupied.length || c >= occupied[0].length || occupied[r][c]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Place an epic at the specified row and column
+function placeEpic(epic, row, col, occupied) {
+    epic.left = col * sprintWidth;
+    epic.top = row * rowHeight;
+
+    for (let r = row; r < row + epic.resourceCount; r++) {
+        for (let c = col; c < col + epic.width; c++) {
+            occupied[r][c] = true;
+        }
+    }
+}
+
+// Compact the epics vertically to eliminate empty vertical space
+function compactEpicsVertically() {
+    const maxResources = parseInt(document.getElementById('highlightRowInput').value) || 1;
+    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false)); // Track occupied cells
+
+    projectData.forEach(epic => {
+        let found = false;
+
+        for (let row = 0; row < maxResources && !found; row++) {
+            for (let col = 0; col < 26 && !found; col++) {
+                if (canPlaceEpic(epic, row, col, occupied)) {
+                    placeEpic(epic, row, col, occupied);
+                    found = true;
+                }
+            }
+        }
+    });
+}
+
+// Add event listener for the arrange button
+document.getElementById('arrangeButton').addEventListener('click', arrangeEpics);
+
 // Initial render of the timeline
 saveAndRender();
