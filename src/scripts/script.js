@@ -138,6 +138,7 @@ function drawResourceRows() {
     const resourceLine = document.createElement('div');
     resourceLine.className = 'resource-line';
     resourceLine.style.top = `${highlightRow * rowHeight - 2}px`;
+    resourceLine.style.width = `${timeline.scrollWidth}px`; // Ensure the red line spans the full width of the timeline
     timeline.appendChild(resourceLine);
 }
 
