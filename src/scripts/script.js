@@ -1,25 +1,29 @@
-// inject:hostname-check
-
+// Load project data from local storage or initialize an empty array
 let projectData = JSON.parse(localStorage.getItem('projectData')) || [];
 const rowHeight = 50;
-const sprintWidth = 120; // Updated sprint width
+const sprintWidth = 120;
 const colors = ['#1a73e8', '#34a853', '#6B8E23', '#009688', '#9c27b0', '#4682B4'];
 
+// Load the highlight row from local storage or default to 1
 let highlightRow = parseInt(localStorage.getItem('highlightRow')) || 1;
 document.getElementById('highlightRowInput').value = highlightRow;
 
+// Update highlight row on input change and re-render
 document.getElementById('highlightRowInput').addEventListener('input', (e) => {
     highlightRow = parseInt(e.target.value) || 1;
     localStorage.setItem('highlightRow', highlightRow);
     render();
 });
 
+// Set up drag event for toolbar items
 document.querySelector('.toolbar-item').addEventListener('dragstart', (e) => {
     e.dataTransfer.setData('type', 'epic');
 });
 
+// Prevent default behavior on dragover
 timeline.addEventListener('dragover', (e) => e.preventDefault());
 
+// Handle drop event to create a new epic
 timeline.addEventListener('drop', (e) => {
     if (e.dataTransfer.getData('type') === 'epic') {
         const left = snapToGrid(e.clientX - timeline.getBoundingClientRect().left);
@@ -31,38 +35,41 @@ timeline.addEventListener('drop', (e) => {
             return;
         }
 
-        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 3, resourceCount: 1, color }); // Store width in sprints
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 3, resourceCount: 1, color });
         saveAndRender();
     }
 });
 
+// Save project data to local storage and re-render
 function saveAndRender() {
     localStorage.setItem('projectData', JSON.stringify(projectData));
     render();
 }
 
+// Clear the timeline and reset settings
 function clearTimeline() {
     projectData = [];
-    localStorage.removeItem('pageTitle'); // Clear the project title
+    localStorage.removeItem('pageTitle');
     saveAndRender();
-    // Reset the effort toggle to "Unlocked"
     isLockAreaEnabled = false;
     localStorage.setItem('isLockAreaEnabled', JSON.stringify(isLockAreaEnabled));
     updateLockAreaToggle();
-    // Reset the project title
     const pageTitleElement = document.getElementById('page-title');
     pageTitleElement.innerText = "My Project";
-    pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+    pageTitleElement.style.color = '#B0B0B0';
 }
 
+// Snap value to the nearest grid line
 function snapToGrid(value) {
     return Math.round(value / sprintWidth) * sprintWidth;
 }
 
+// Snap value to the nearest row
 function snapToRow(value) {
     return Math.round(value / rowHeight) * rowHeight;
 }
 
+// Render the timeline and epics
 function render() {
     timeline.innerHTML = '<div class="timeline-grid"></div>';
     drawResourceRows();
@@ -70,30 +77,31 @@ function render() {
     drawSprintGrid();
 }
 
+// Draw resource rows on the timeline
 function drawResourceRows() {
-    const timelineWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
-    for (let i = 0; i < 50; i++) { // Set the total number of resource rows to 50
+    const timelineWidth = 26 * sprintWidth;
+    for (let i = 0; i < 50; i++) {
         const row = document.createElement('div');
         row.className = 'resource-row';
         row.style.top = `${i * rowHeight}px`;
-        row.style.width = `${timelineWidth}px`; // Set the width to match the total width of the timeline
+        row.style.width = `${timelineWidth}px`;
         timeline.appendChild(row);
     }
 
-    // Add the red line at the bottom of the row that corresponds to the number of resources set
     const resourceLine = document.createElement('div');
     resourceLine.className = 'resource-line';
-    resourceLine.style.top = `${highlightRow * rowHeight - 2}px`; // Position the line at the bottom of the row
+    resourceLine.style.top = `${highlightRow * rowHeight - 2}px`;
     timeline.appendChild(resourceLine);
 }
 
+// Create an epic element
 function createEpicElement(epic) {
     const epicEl = document.createElement('div');
     epicEl.className = 'epic';
     epicEl.style.backgroundColor = epic.color;
     epicEl.style.top = `${epic.top}px`;
     epicEl.style.left = `${epic.left}px`;
-    epicEl.style.width = `${epic.width * sprintWidth}px`; // Convert width from sprints to pixels
+    epicEl.style.width = `${epic.width * sprintWidth}px`;
     epicEl.style.height = `${epic.resourceCount * rowHeight}px`;
 
     epicEl.innerHTML = `
@@ -108,20 +116,23 @@ function createEpicElement(epic) {
     return epicEl;
 }
 
+// Delete an epic by ID
 function deleteEpic(epicId) {
     projectData = projectData.filter(epic => epic.id !== epicId);
     saveAndRender();
 }
 
+// Start editing the name of an epic
 function startEditingEpicName(epicId) {
     const epic = projectData.find(e => e.id === epicId);
     const newName = prompt("Edit Epic Name:", epic.name);
     if (newName !== null) {
-        epic.name = newName.trim() || "New Epic"; // Return to default name if the name is deleted
+        epic.name = newName.trim() || "New Epic";
         saveAndRender();
     }
 }
 
+// Make an element draggable
 function makeDraggable(element, epic) {
     element.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('resize-handle')) startResizing(e, epic);
@@ -130,8 +141,9 @@ function makeDraggable(element, epic) {
     });
 }
 
+// Start dragging an epic
 function startDragging(e, epic) {
-    e.preventDefault(); // Prevent text selection
+    e.preventDefault();
     const offsetX = e.clientX - e.target.getBoundingClientRect().left;
     const offsetY = e.clientY - e.target.getBoundingClientRect().top;
 
@@ -139,10 +151,7 @@ function startDragging(e, epic) {
         let newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
         let newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
 
-        // Prevent dragging beyond the left bound
         if (newLeft < 0) newLeft = 0;
-
-        // Prevent dragging beyond the top bound
         if (newTop < 0) newTop = 0;
 
         if (!checkOverlap(epic, newLeft, newTop, epic.width * sprintWidth, epic.resourceCount * rowHeight)) {
@@ -154,6 +163,7 @@ function startDragging(e, epic) {
     document.onmouseup = () => document.onmousemove = null;
 }
 
+// Start resizing an epic horizontally
 function startResizing(e, epic) {
     const startX = e.clientX;
     const initialWidth = epic.width * sprintWidth;
@@ -161,11 +171,11 @@ function startResizing(e, epic) {
 
     document.onmousemove = (e) => {
         const newWidth = snapToGrid(Math.max(sprintWidth, initialWidth + (e.clientX - startX)));
-        const newEpicWidth = Math.round(newWidth / sprintWidth); // Store width in whole sprints
+        const newEpicWidth = Math.round(newWidth / sprintWidth);
 
         if (isLockAreaEnabled) {
             const totalCells = (initialHeight / rowHeight) * (initialWidth / sprintWidth);
-            const newResourceCount = Math.round(totalCells / newEpicWidth); // Adjust resource count to whole numbers
+            const newResourceCount = Math.round(totalCells / newEpicWidth);
 
             if (!checkOverlap(epic, epic.left, epic.top, newEpicWidth * sprintWidth, newResourceCount * rowHeight)) {
                 epic.width = newEpicWidth;
@@ -184,6 +194,7 @@ function startResizing(e, epic) {
     e.stopPropagation();
 }
 
+// Toggle the lock area state
 let isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
 
 function toggleLockArea() {
@@ -192,6 +203,7 @@ function toggleLockArea() {
     updateLockAreaToggle();
 }
 
+// Update the lock area toggle button
 function updateLockAreaToggle() {
     const lockAreaToggle = document.getElementById('lock-effort-toggle');
     const icon = lockAreaToggle.querySelector('i');
@@ -208,9 +220,9 @@ function updateLockAreaToggle() {
     }
 }
 
-// Call updateLockAreaToggle on page load to set the initial state
 updateLockAreaToggle();
 
+// Start resizing an epic vertically
 function startVerticalResizing(e, epic) {
     const startY = e.clientY;
     const initialHeight = epic.resourceCount * rowHeight;
@@ -218,11 +230,11 @@ function startVerticalResizing(e, epic) {
 
     document.onmousemove = (e) => {
         const newHeight = snapToRow(Math.max(rowHeight, initialHeight + (e.clientY - startY)));
-        const newResourceCount = Math.round(newHeight / rowHeight); // Store resource count in whole numbers
+        const newResourceCount = Math.round(newHeight / rowHeight);
 
         if (isLockAreaEnabled) {
             const totalCells = (initialHeight / rowHeight) * (initialWidth / sprintWidth);
-            const newEpicWidth = Math.round(totalCells / newResourceCount); // Adjust width to whole sprints
+            const newEpicWidth = Math.round(totalCells / newResourceCount);
 
             if (!checkOverlap(epic, epic.left, epic.top, newEpicWidth * sprintWidth, newResourceCount * rowHeight)) {
                 epic.width = newEpicWidth;
@@ -241,6 +253,7 @@ function startVerticalResizing(e, epic) {
     e.stopPropagation();
 }
 
+// Check if an epic overlaps with others
 function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, height = currentEpic?.resourceCount * rowHeight) {
     return projectData.some(epic =>
         epic.id !== currentEpic?.id &&
@@ -253,18 +266,19 @@ function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprin
     );
 }
 
+// Draw the sprint grid on the timeline
 function drawSprintGrid() {
     const grid = document.querySelector('.timeline-grid');
     grid.innerHTML = '';
-    const gridWidth = 26 * sprintWidth; // Set the timeline length to 26 sprints
-    const gridHeight = 50 * rowHeight;  // Set the grid height to match 50 resources
+    const gridWidth = 26 * sprintWidth;
+    const gridHeight = 50 * rowHeight;
 
     for (let x = 0; x < gridWidth; x += sprintWidth) {
         if (x > 0 && (x / sprintWidth) % 6 === 0) {
             const border = document.createElement('div');
             border.className = 'sprint-border';
             border.style.left = `${x}px`;
-            border.style.height = `${gridHeight}px`;  // Make the border span full height
+            border.style.height = `${gridHeight}px`;
             grid.appendChild(border);
         }
     }
@@ -275,10 +289,10 @@ const savedTitle = localStorage.getItem('pageTitle');
 const pageTitleElement = document.getElementById('page-title');
 if (savedTitle && savedTitle !== "My Project") {
     pageTitleElement.innerText = savedTitle;
-    pageTitleElement.style.color = ''; // Reset to default color
+    pageTitleElement.style.color = '';
 } else {
     pageTitleElement.innerText = "My Project";
-    pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+    pageTitleElement.style.color = '#B0B0B0';
 }
 
 // Prevent the title from expanding vertically when hitting "Enter"
@@ -293,10 +307,10 @@ pageTitleElement.addEventListener('input', (e) => {
     const title = e.target.innerText.trim();
     if (title && title !== "My Project") {
         localStorage.setItem('pageTitle', title);
-        pageTitleElement.style.color = ''; // Reset to default color
+        pageTitleElement.style.color = '';
     } else {
         pageTitleElement.innerText = "My Project";
-        pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+        pageTitleElement.style.color = '#B0B0B0';
         localStorage.setItem('pageTitle', "My Project");
     }
 });
@@ -328,17 +342,15 @@ function uploadData(event) {
             localStorage.setItem('pageTitle', data.pageTitle || "My Project");
             localStorage.setItem('isLockAreaEnabled', JSON.stringify(data.isLockAreaEnabled || false));
             saveAndRender();
-            // Update the project title
             const pageTitleElement = document.getElementById('page-title');
             const savedTitle = localStorage.getItem('pageTitle');
             if (savedTitle && savedTitle !== "My Project") {
                 pageTitleElement.innerText = savedTitle;
-                pageTitleElement.style.color = ''; // Reset to default color
+                pageTitleElement.style.color = '';
             } else {
                 pageTitleElement.innerText = "My Project";
-                pageTitleElement.style.color = '#B0B0B0'; // Light gray color for default text
+                pageTitleElement.style.color = '#B0B0B0';
             }
-            // Update the effort toggle
             isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
             updateLockAreaToggle();
         };
@@ -346,4 +358,5 @@ function uploadData(event) {
     }
 }
 
+// Initial render of the timeline
 saveAndRender();

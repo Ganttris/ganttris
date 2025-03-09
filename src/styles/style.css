@@ -17,42 +17,42 @@ body {
 
 .toolbar-item {
     padding: 10px 20px;
-    background: #0078d4;  /* Stronger blue (more contrast) */
-    color: #ffffff;       /* White text for contrast */
-    border: 1px solid #005a9e; /* Slightly darker border */
+    background: #0078d4;  
+    color: #ffffff;       
+    border: 1px solid #005a9e; 
 }
 
 .toolbar-item.btn-epic {
-    cursor: grab; /* Apply grab cursor only to the epic button */
+    cursor: grab; 
 }
 
 .toolbar-item.btn-epic:hover {
-    cursor: grab; /* Change cursor to grab on hover for the epic button */
+    cursor: grab; 
 }
 
 .timeline { 
     position: relative; 
     background: #282a36; 
     border: 1px solid #44475a; 
-    height: calc(500px + 17px); /* Set the height to 10 resources tall (10 * 50px) plus scrollbar height */
-    overflow-x: auto; /* Make the timeline horizontally scrollable */
-    overflow-y: auto; /* Make the timeline vertically scrollable */
-    white-space: nowrap; /* Prevent wrapping of content */
-    width: 100%; /* Match the width of the browser */
+    height: calc(500px + 17px); 
+    overflow-x: auto; 
+    overflow-y: auto; 
+    white-space: nowrap; 
+    width: 100%; 
 }
 
 .epic {
     position: absolute;
-    color: #ffffff;       /* White text for contrast */
+    color: #ffffff;       
     padding: 5px;
     box-sizing: border-box;
     border-radius: 5px;
     cursor: grab;
     border: 1px solid #44475a;
-    user-select: none; /* Prevent text selection */
-    -webkit-user-select: none; /* Prevent text selection in Safari */
-    -moz-user-select: none; /* Prevent text selection in Firefox */
-    -ms-user-select: none; /* Prevent text selection in IE */
+    user-select: none; 
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
 }
 
 .resize-handle, .resize-handle-vertical { background: rgba(255,255,255,0.5); }
@@ -64,7 +64,7 @@ body {
     width: 10px; 
     height: 100%; 
     cursor: ew-resize; 
-    z-index: 1; /* Ensure the resize handle is above other elements */
+    z-index: 1; 
 }
 
 .resize-handle-vertical { 
@@ -74,55 +74,49 @@ body {
     width: 100%; 
     height: 8px; 
     cursor: ns-resize; 
-    z-index: 1; /* Ensure the resize handle is above other elements */
+    z-index: 1; 
 }
 
 .epic-label {
     position: absolute;
-    bottom: 9px; /* Move the label just above the resize handle */
-    right: 14px; /* Adjust to avoid overlap with the resize handle */
-    background: #444;
+    bottom: 9px; 
+    right: 14px; 
     color: #fff;
     padding: 2px 4px;
     border-radius: 3px;
     font-size: 12px;
-    z-index: 0; /* Ensure the label is below the resize handle */
+    z-index: 0; 
 }
 
 .epic-resource-label {
     position: absolute;
-    bottom: 9px; /* Move the label just above the resize handle */
+    bottom: 9px; 
     left: 4px;
-    background: #444;
     color: #fff;
     padding: 2px 4px;
     border-radius: 3px;
     font-size: 12px;
-    z-index: 0; /* Ensure the label is below the resize handle */
+    z-index: 0; 
 }
 
 .resource-row { 
     position: relative; 
     height: 50px; 
-    width: 100%; /* Ensure the row spans the full width */
-    background-color: #282a36; /* Default background color for resource rows */
+    width: 100%; 
+    background-color: #282a36; 
 }
 
 .resource-row:nth-child(odd) { background: rgba(255, 255, 255, 0.05); }
 
 .resource-row:nth-child(even) { background: rgba(255, 255, 255, 0.08); }
 
-.resource-row.highlight {
-    /* Remove background color definition */
-}
-
 .highlight { box-shadow: inset 0 -3px 0 darkred; }
 
 button {
     margin-top: 10px;
     padding: 8px 16px;
-    background: #D32F2F; /* WCAG-compliant red */
-    color: #ffffff;     /* High contrast white */
+    background: #D32F2F; 
+    color: #ffffff;     
     border: none;
     cursor: pointer;
     font-weight: bold;
@@ -148,30 +142,30 @@ button {
 }
 
 .btn-clear {
-    background-color: #D32F2F; /* Red */
+    background-color: #D32F2F; 
 }
 
 .btn-download {
-    background-color: #4CAF50; /* Green */
+    background-color: #4CAF50; 
 }
 
 .btn-upload {
-    background-color: #2196F3; /* Blue */
+    background-color: #2196F3; 
 }
 
 .btn-epic {
-    background-color: #0078d4; /* Blue */
+    background-color: #0078d4; 
 }
 
 .btn-lock {
-    background-color: #ff9800; /* Orange */
-    width: 100px; /* Adjusted width */
-    text-align: center; /* Center text */
-    cursor: pointer; /* Standard button cursor */
+    background-color: #ff9800; 
+    width: 70px; /* Adjusted width */
+    text-align: center; 
+    cursor: pointer; 
 }
 
 .btn-lock.locked {
-    background-color: #4caf50; /* Green */
+    background-color: #4caf50; 
 }
 
 .btn i {
@@ -179,10 +173,10 @@ button {
 }
 
 #page-title {
-    color: #f8f8f2; /* Default color */
-    white-space: nowrap; /* Ensure the title is only one line */
-    overflow: hidden; /* Hide overflow text */
-    text-overflow: ellipsis; /* Add ellipsis for overflow text */
+    color: #f8f8f2; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 
 footer {
@@ -192,9 +186,9 @@ footer {
     color: #f8f8f2;
     position: fixed;
     bottom: 0;
-    left: 0; /* Ensure the footer starts from the left edge */
-    right: 0; /* Ensure the footer ends at the right edge */
-    width: 100%; /* Ensure the footer takes up the full width */
+    left: 0; 
+    right: 0; 
+    width: 100%; 
     border-top: 1px solid #44475a;
 }
 
@@ -203,8 +197,8 @@ footer {
     width: 100%;
     height: 2px;
     background-color: red;
-    z-index: 10; /* Ensure the red line is on top of the epics */
-    bottom: 0; /* Position the line at the bottom of the row */
+    z-index: 10; 
+    bottom: 0; 
 }
 
 .delete-epic {
@@ -212,13 +206,8 @@ footer {
     top: 5px;
     right: 14px;
     cursor: pointer;
-    background: #444; /* Dark grey background */
-    color: #fff; /* White text */
+    color: #fff; 
     padding: 2px 4px;
     border-radius: 3px;
-    font-size: 12px; /* Match the font size of resource and sprint counts */
-}
-
-.delete-epic:hover {
-    background: #555; /* Slightly lighter grey on hover */
+    font-size: 12px; 
 }
