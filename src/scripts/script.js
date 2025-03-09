@@ -49,13 +49,13 @@ timeline.addEventListener('dragover', (e) => e.preventDefault());
 // Handle drop event to create a new epic
 timeline.addEventListener('drop', (e) => {
     if (e.dataTransfer.getData('type') === 'epic') {
-        let left = snapToGrid(e.clientX - timeline.getBoundingClientRect().left);
+        let left = snapToGrid(e.clientX + timeline.scrollLeft - timeline.getBoundingClientRect().left);
         let top = snapToRow(e.clientY - timeline.getBoundingClientRect().top);
         const color = colors[projectData.length % colors.length];
 
         // Ensure the new epic drops in the same resource row and sprint column the mouse pointer is hovering over
         const rowIndex = Math.floor((e.clientY - timeline.getBoundingClientRect().top) / rowHeight);
-        const colIndex = Math.floor((e.clientX - timeline.getBoundingClientRect().left) / sprintWidth);
+        const colIndex = Math.floor((e.clientX + timeline.scrollLeft - timeline.getBoundingClientRect().left) / sprintWidth);
         top = rowIndex * rowHeight;
         left = colIndex * sprintWidth;
 
