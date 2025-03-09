@@ -8,10 +8,13 @@ const inject = require('gulp-inject');
 const fs = require('fs');
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
 const replace = require('gulp-replace');
-const packageJson = require('./package.json');
 const htmlReplace = require('gulp-html-replace');
-const obfuscator = require('gulp-javascript-obfuscator');
 const del = require('del');
+
+// Clean task
+gulp.task('clean', function() {
+    return del(['dist']);
+});
 
 // Minify and concatenate CSS
 gulp.task('minify-css', () => {
@@ -32,21 +35,19 @@ gulp.task('minify-js', () => {
                 window.location.href = 'https://ganttris.com';
             }
         `))
-        .pipe(uglify())
         .pipe(javascriptObfuscator())
+        .pipe(uglify())
         .pipe(concat('script.min.js'))
         .pipe(gulp.dest('dist/scripts'));
 });
 
-// Minify HTML, inject references, and update title with version
-gulp.task('minify-html', () => {
-    console.log('Minifying HTML, injecting references, and updating title...');
-    const target = gulp.src('src/*.html');
-    const sources = gulp.src(['dist/styles/style.min.css', 'dist/scripts/script.min.js'], { read: false });
-
-    return target
-        .pipe(inject(sources, { ignorePath: 'dist', addRootSlash: false }))
-        .pipe(replace(/<title>.*<\/title>/, `<title>Ganttris - v${packageJson.version}</title>`))
+// Minify HTML and inject references
+gulp.task('html', function() {
+    return gulp.src('src/*.html')
+        .pipe(htmlReplace({
+            'css': 'styles/style.min.css',
+            'js': 'scripts/script.min.js'
+        }))
         .pipe(htmlmin({ collapseWhitespace: true }))
         .pipe(gulp.dest('dist'));
 });
@@ -77,15 +78,15 @@ gulp.task('cache-bust', function () {
     const timestamp = new Date().getTime();
     return gulp.src('src/index.html')
         .pipe(htmlReplace({
-            'css': `styles/style.css?v=${timestamp}`,
-            'js': `scripts/script.js?v=${timestamp}`
+            'css': `styles/style.min.css?v=${timestamp}`,
+            'js': `scripts/script.min.js?v=${timestamp}`
         }))
         .pipe(gulp.dest('dist'));
 });
 
-// Clean task
-gulp.task('clean', function() {
-    return del(['dist/scripts/*.js', '!dist/scripts/*.min.js', 'dist/styles/*.css', '!dist/styles/*.min.css']);
+// Delete unminified files
+gulp.task('delete-unminified', function() {
+    return del(['dist/styles/style.css', 'dist/scripts/script.js']);
 });
 
 // Scripts task
@@ -94,6 +95,7 @@ gulp.task('scripts', function() {
         .pipe(concat('script.js'))
         .pipe(gulp.dest('dist/scripts'))
         .pipe(rename('script.min.js'))
+        .pipe(javascriptObfuscator())
         .pipe(uglify())
         .pipe(gulp.dest('dist/scripts'));
 });
@@ -108,18 +110,11 @@ gulp.task('styles', function() {
         .pipe(gulp.dest('dist/styles'));
 });
 
-// HTML task
-gulp.task('html', function() {
-    return gulp.src('src/*.html')
-        .pipe(htmlmin({ collapseWhitespace: true }))
-        .pipe(gulp.dest('dist'));
-});
-
 // Build task
-gulp.task('build', gulp.series('scripts', 'styles', 'html', 'clean'));
+gulp.task('build', gulp.series('clean', 'scripts', 'styles', 'html', 'minify-css', 'minify-js', 'copy-assets', 'create-nojekyll', 'create-cname', 'cache-bust', 'delete-unminified'));
 
 // Default task
-gulp.task('default', gulp.series('build', 'minify-css', 'minify-js', 'minify-html', 'copy-assets', 'create-nojekyll', 'create-cname', (done) => {
+gulp.task('default', gulp.series('build', (done) => {
     console.log('Build process completed.');
     done();
 }));
