@@ -1,11 +1,11 @@
 {
   "name": "ganttris",
-  "version": "0.7.2",
-  "description": "A project for managing tasks and resources visually using a Gantt chart interface.",
+  "version": "1.1.0",
+  "description": "A project management tool",
   "main": "src/index.html",
   "scripts": {
     "build": "gulp build",
-    "start": "live-server --watch=src,dist",
+    "start": "live-server src",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
@@ -30,5 +30,5 @@
     "live-server": "^1.2.0"
   },
   "author": "Joe Bader",
-  "license": "Apache-2.0"
+  "license": "Proprietary"
 }
