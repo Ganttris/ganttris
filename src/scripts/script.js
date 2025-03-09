@@ -18,6 +18,29 @@ document.getElementById('highlightRowInput').addEventListener('input', (e) => {
 // Set up drag event for toolbar items
 document.querySelector('.toolbar-item').addEventListener('dragstart', (e) => {
     e.dataTransfer.setData('type', 'epic');
+
+    // Prevent the browser from dragging the toolbar button
+    e.dataTransfer.setDragImage(new Image(), 0, 0);
+
+    // Create a visual epic object to follow the cursor
+    const visualEpic = document.createElement('div');
+    visualEpic.className = 'epic';
+    visualEpic.style.position = 'absolute';
+    visualEpic.style.width = `${sprintWidth}px`;
+    visualEpic.style.height = `${rowHeight}px`;
+    visualEpic.style.backgroundColor = colors[projectData.length % colors.length];
+    visualEpic.style.opacity = '0.5';
+    visualEpic.style.pointerEvents = 'none';
+    document.body.appendChild(visualEpic);
+
+    document.addEventListener('dragover', (e) => {
+        visualEpic.style.left = `${e.clientX - sprintWidth / 2}px`;
+        visualEpic.style.top = `${e.clientY - rowHeight / 2}px`;
+    });
+
+    document.addEventListener('drop', () => {
+        document.body.removeChild(visualEpic);
+    }, { once: true });
 });
 
 // Prevent default behavior on dragover
@@ -26,16 +49,40 @@ timeline.addEventListener('dragover', (e) => e.preventDefault());
 // Handle drop event to create a new epic
 timeline.addEventListener('drop', (e) => {
     if (e.dataTransfer.getData('type') === 'epic') {
-        const left = snapToGrid(e.clientX - timeline.getBoundingClientRect().left);
-        const top = snapToRow(projectData.length * rowHeight);
+        let left = snapToGrid(e.clientX - timeline.getBoundingClientRect().left);
+        let top = snapToRow(e.clientY - timeline.getBoundingClientRect().top);
         const color = colors[projectData.length % colors.length];
 
-        if (checkOverlap(null, left, top, sprintWidth * 3)) {
-            alert("Cannot place Epic here - overlaps with existing Epic.");
-            return;
+        // Ensure the new epic drops in the same resource row and sprint column the mouse pointer is hovering over
+        const rowIndex = Math.floor((e.clientY - timeline.getBoundingClientRect().top) / rowHeight);
+        const colIndex = Math.floor((e.clientX - timeline.getBoundingClientRect().left) / sprintWidth);
+        top = rowIndex * rowHeight;
+        left = colIndex * sprintWidth;
+
+        // Check for overlap and adjust position if necessary
+        if (checkOverlap(null, left, top, sprintWidth, rowHeight)) {
+            const adjustment = 10; // Adjust by 10 pixels
+            let adjusted = false;
+
+            for (let dx = -adjustment; dx <= adjustment; dx += adjustment) {
+                for (let dy = -adjustment; dy <= adjustment; dy += adjustment) {
+                    if (!checkOverlap(null, left + dx, top + dy, sprintWidth, rowHeight)) {
+                        left += dx;
+                        top += dy;
+                        adjusted = true;
+                        break;
+                    }
+                }
+                if (adjusted) break;
+            }
+
+            if (!adjusted) {
+                alert("Cannot place Epic here - overlaps with existing Epic.");
+                return;
+            }
         }
 
-        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 3, resourceCount: 1, color });
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 1, resourceCount: 1, color }); // Default width to 1 sprint and resource count to 1
         saveAndRender();
     }
 });
