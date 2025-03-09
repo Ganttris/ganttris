@@ -159,7 +159,7 @@ button {
 
 .btn-lock {
     background-color: #ff9800; 
-    width: 70px; /* Adjusted width */
+    width: 70px;
     text-align: center; 
     cursor: pointer; 
 }
@@ -173,7 +173,7 @@ button {
 }
 
 .btn-arrange {
-    background-color: #ff9800; 
+    background-color: #4B0082;
 }
 
 #page-title {
