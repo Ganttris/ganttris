@@ -82,7 +82,7 @@ timeline.addEventListener('drop', (e) => {
             }
         }
 
-        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 1, resourceCount: 1, color }); // Default width to 1 sprint and resource count to 1
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 1, resourceCount: 1, color, starred: false }); // Default width to 1 sprint and resource count to 1
         saveAndRender();
     }
 });
@@ -158,6 +158,7 @@ function createEpicElement(epic) {
         <div class="resize-handle-vertical"></div>
         <div class="epic-label"><i class="fas fa-clock"></i> ${epic.width}</div>
         <div class="epic-resource-label"><i class="fas fa-users"></i> ${epic.resourceCount}</div>
+        <div class="star-epic" onclick="toggleStarEpic(${epic.id})"><i class="fa${epic.starred ? 's' : 'r'} fa-star"></i></div>
         <div class="delete-epic" onclick="deleteEpic(${epic.id})"><i class="fas fa-trash-alt"></i></div>
     `;
     makeDraggable(epicEl, epic);
@@ -205,10 +206,13 @@ function startDragging(e, epic) {
         if (!checkOverlap(epic, newLeft, newTop, epic.width * sprintWidth, epic.resourceCount * rowHeight)) {
             epic.left = newLeft;
             epic.top = newTop;
-            saveAndRender();
+            render(); // Update the position visually during dragging
         }
     };
-    document.onmouseup = () => document.onmousemove = null;
+    document.onmouseup = () => {
+        document.onmousemove = null;
+        saveAndRender(); // Save the final position after dragging
+    };
 }
 
 // Start resizing an epic horizontally
@@ -411,7 +415,13 @@ function arrangeEpics() {
     const maxResources = parseInt(document.getElementById('highlightRowInput').value) || 1;
     const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false)); // Track occupied cells
 
-    projectData.sort((a, b) => (b.resourceCount * b.width) - (a.resourceCount * a.width)); // Sort epics by size
+    // Sort epics by starred status and then by size
+    projectData.sort((a, b) => {
+        if (a.starred !== b.starred) {
+            return b.starred - a.starred;
+        }
+        return (b.resourceCount * b.width) - (a.resourceCount * a.width);
+    });
 
     projectData.forEach(epic => {
         let found = false;
@@ -475,6 +485,13 @@ function compactEpicsVertically() {
             }
         }
     });
+}
+
+// Toggle the star status of an epic
+function toggleStarEpic(epicId) {
+    const epic = projectData.find(e => e.id === epicId);
+    epic.starred = !epic.starred;
+    saveAndRender();
 }
 
 // Add event listener for the arrange button

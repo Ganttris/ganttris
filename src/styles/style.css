@@ -215,3 +215,14 @@ footer {
     border-radius: 3px;
     font-size: 12px; 
 }
+
+.star-epic {
+    position: absolute;
+    top: 5px;
+    right: 34px; /* Adjusted position to the left of the trash icon */
+    cursor: pointer;
+    color: #fff; 
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 12px; 
+}
