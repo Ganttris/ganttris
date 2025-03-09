@@ -4,12 +4,11 @@ const cssnano = require('gulp-cssnano');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const concat = require('gulp-concat');
-const inject = require('gulp-inject');
 const fs = require('fs');
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
 const replace = require('gulp-replace');
-const htmlReplace = require('gulp-html-replace');
 const del = require('del');
+const packageJson = require('./package.json'); // Added to read package.json
 
 // Clean task
 gulp.task('clean', function() {
@@ -43,11 +42,12 @@ gulp.task('minify-js', () => {
 
 // Minify HTML and inject references
 gulp.task('html', function() {
+    const timestamp = new Date().getTime();
+    const version = packageJson.version; // Get version from package.json
     return gulp.src('src/*.html')
-        .pipe(htmlReplace({
-            'css': 'styles/style.min.css',
-            'js': 'scripts/script.min.js'
-        }))
+        .pipe(replace('styles/style.css', `styles/style.min.css?v=${timestamp}`))
+        .pipe(replace('scripts/script.js', `scripts/script.min.js?v=${timestamp}`))
+        .pipe(replace('<title>Ganttris</title>', `<title>Ganttris v${version}</title>`)) // Add version to title
         .pipe(htmlmin({ collapseWhitespace: true }))
         .pipe(gulp.dest('dist'));
 });
@@ -71,17 +71,6 @@ gulp.task('create-cname', (done) => {
     console.log('Creating CNAME file...');
     fs.writeFileSync('dist/CNAME', 'ganttris.com'); // Replace with your custom domain
     done();
-});
-
-// Cache busting
-gulp.task('cache-bust', function () {
-    const timestamp = new Date().getTime();
-    return gulp.src('src/index.html')
-        .pipe(htmlReplace({
-            'css': `styles/style.min.css?v=${timestamp}`,
-            'js': `scripts/script.min.js?v=${timestamp}`
-        }))
-        .pipe(gulp.dest('dist'));
 });
 
 // Delete unminified files
@@ -111,7 +100,7 @@ gulp.task('styles', function() {
 });
 
 // Build task
-gulp.task('build', gulp.series('clean', 'scripts', 'styles', 'html', 'minify-css', 'minify-js', 'copy-assets', 'create-nojekyll', 'create-cname', 'cache-bust', 'delete-unminified'));
+gulp.task('build', gulp.series('clean', 'scripts', 'styles', 'html', 'minify-css', 'minify-js', 'copy-assets', 'create-nojekyll', 'create-cname', 'delete-unminified'));
 
 // Default task
 gulp.task('default', gulp.series('build', (done) => {
