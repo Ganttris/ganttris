@@ -65,7 +65,7 @@ timeline.addEventListener('drop', (e) => {
             let adjusted = false;
 
             for (let dx = -adjustment; dx <= adjustment; dx += adjustment) {
-                for (let dy = -adjustment; dy <= adjustment; dy += adjustment) {
+                for (let dy = -adjustment; dy += adjustment; dy += adjustment) {
                     if (!checkOverlap(null, left + dx, top + dy, sprintWidth, rowHeight)) {
                         left += dx;
                         top += dy;
@@ -161,8 +161,16 @@ function createEpicElement(epic) {
         <div class="star-epic" onclick="toggleStarEpic(${epic.id})"><i class="fa${epic.starred ? 's' : 'r'} fa-star"></i></div>
         <div class="delete-epic" onclick="deleteEpic(${epic.id})"><i class="fas fa-trash-alt"></i></div>
     `;
+
     makeDraggable(epicEl, epic);
     return epicEl;
+}
+
+// Toggle the star status of an epic
+function toggleStarEpic(epicId) {
+    const epic = projectData.find(e => e.id === epicId);
+    epic.starred = !epic.starred;
+    saveAndRender();
 }
 
 // Delete an epic by ID
@@ -184,9 +192,13 @@ function startEditingEpicName(epicId) {
 // Make an element draggable
 function makeDraggable(element, epic) {
     element.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('resize-handle')) startResizing(e, epic);
-        else if (e.target.classList.contains('resize-handle-vertical')) startVerticalResizing(e, epic);
-        else startDragging(e, epic);
+        if (e.target.classList.contains('resize-handle')) {
+            startResizing(e, epic);
+        } else if (e.target.classList.contains('resize-handle-vertical')) {
+            startVerticalResizing(e, epic);
+        } else if (!e.target.classList.contains('star-epic') && !e.target.classList.contains('delete-epic') && !e.target.closest('.epic > div[onclick]')) {
+            startDragging(e, epic);
+        }
     });
 }
 
@@ -196,8 +208,12 @@ function startDragging(e, epic) {
     const offsetX = e.clientX - e.target.getBoundingClientRect().left;
     const offsetY = e.clientY - e.target.getBoundingClientRect().top;
 
+    let visualEpic;
+    let isDragging = false;
+    let isBlocked = false;
+
     document.onmousemove = (e) => {
-        let newLeft = snapToGrid(e.clientX - offsetX - timeline.getBoundingClientRect().left);
+        let newLeft = snapToGrid(e.clientX - offsetX + timeline.scrollLeft - timeline.getBoundingClientRect().left);
         let newTop = snapToRow(e.clientY - offsetY - timeline.getBoundingClientRect().top);
 
         if (newLeft < 0) newLeft = 0;
@@ -207,12 +223,41 @@ function startDragging(e, epic) {
             epic.left = newLeft;
             epic.top = newTop;
             render(); // Update the position visually during dragging
+            if (visualEpic) {
+                document.body.removeChild(visualEpic);
+                visualEpic = null;
+            }
+            isBlocked = false;
+        } else {
+            if (!isDragging || !isBlocked) {
+                isDragging = true;
+                isBlocked = true;
+                // Create a visual epic object to follow the cursor
+                visualEpic = document.createElement('div');
+                visualEpic.className = 'epic';
+                visualEpic.style.position = 'absolute';
+                visualEpic.style.width = `${epic.width * sprintWidth}px`;
+                visualEpic.style.height = `${epic.resourceCount * rowHeight}px`;
+                visualEpic.style.backgroundColor = epic.color;
+                visualEpic.style.opacity = '0.5';
+                visualEpic.style.pointerEvents = 'none';
+                document.body.appendChild(visualEpic);
+            }
+            visualEpic.style.left = `${e.clientX - offsetX}px`;
+            visualEpic.style.top = `${e.clientY - offsetY}px`;
         }
     };
+
     document.onmouseup = () => {
         document.onmousemove = null;
+        if (visualEpic) {
+            document.body.removeChild(visualEpic);
+        }
         saveAndRender(); // Save the final position after dragging
     };
+
+    // Prevent the visual representation from flashing below the timeline
+    e.stopPropagation();
 }
 
 // Start resizing an epic horizontally
@@ -485,13 +530,6 @@ function compactEpicsVertically() {
             }
         }
     });
-}
-
-// Toggle the star status of an epic
-function toggleStarEpic(epicId) {
-    const epic = projectData.find(e => e.id === epicId);
-    epic.starred = !epic.starred;
-    saveAndRender();
 }
 
 // Add event listener for the arrange button

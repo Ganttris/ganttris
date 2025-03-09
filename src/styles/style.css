@@ -219,10 +219,10 @@ footer {
 .star-epic {
     position: absolute;
     top: 5px;
-    right: 34px; /* Adjusted position to the left of the trash icon */
+    right: 34px;
     cursor: pointer;
-    color: #fff; 
+    color: #fff;
     padding: 2px 4px;
     border-radius: 3px;
-    font-size: 12px; 
+    font-size: 12px;
 }
