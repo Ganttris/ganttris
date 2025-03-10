@@ -12,6 +12,7 @@
     "test:e2e": "node e2e-runner.js",
     "test:e2e:debug": "node e2e-runner.js --debug",
     "test:e2e:direct": "node direct-e2e-runner.js",
+    "test:e2e:epic": "node direct-e2e-runner.js -- --project=chromium --grep=\"Epic Interactions\"",
     "test:stop": "node taskkill-all.js"
   },
   "repository": {

@@ -104,7 +104,46 @@ function snapToRow(value) {
 function render() {
     timeline.innerHTML = '<div class="timeline-grid"></div>';
     drawResourceRows();
-    projectData.forEach(epic => timeline.appendChild(createEpicElement(epic)));
+    
+    // Create and attach all epic elements separately to ensure event handlers are properly set up
+    projectData.forEach(epic => {
+        const epicElement = createEpicElement(epic);
+        timeline.appendChild(epicElement);
+        
+        // Add event listeners directly after appending
+        const resizeHandle = epicElement.querySelector('.resize-handle');
+        const verticalResizeHandle = epicElement.querySelector('.resize-handle-vertical');
+        const starIcon = epicElement.querySelector('.star-epic');
+        const deleteIcon = epicElement.querySelector('.delete-epic');
+        
+        // Attach epic dragging behavior
+        epicElement.addEventListener('mousedown', (e) => {
+            // Don't start dragging if clicking on interactive elements
+            if (e.target === resizeHandle || e.target === verticalResizeHandle || 
+                e.target === starIcon || e.target === deleteIcon || 
+                e.target.closest('.epic > div[onclick]')) {
+                return;
+            }
+            startDragging(e, epic);
+        });
+        
+        // Attach resize handle behavior
+        if (resizeHandle) {
+            resizeHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                startResizing(e, epic);
+            });
+        }
+        
+        // Attach vertical resize handle behavior
+        if (verticalResizeHandle) {
+            verticalResizeHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                startVerticalResizing(e, epic);
+            });
+        }
+    });
+    
     drawSprintGrid();
 }
 
@@ -144,7 +183,7 @@ function createEpicElement(epic) {
         <div class="delete-epic" onclick="deleteEpic(${epic.id})"><i class="fas fa-trash-alt"></i></div>
     `;
 
-    makeDraggable(epicEl, epic);
+    // Note: We don't call makeDraggable here anymore since we handle events in render()
     return epicEl;
 }
 
@@ -166,18 +205,6 @@ function startEditingEpicName(epicId) {
         epic.name = newName.trim() || "New Epic";
         saveAndRender();
     }
-}
-
-function makeDraggable(element, epic) {
-    element.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('resize-handle')) {
-            startResizing(e, epic);
-        } else if (e.target.classList.contains('resize-handle-vertical')) {
-            startVerticalResizing(e, epic);
-        } else if (!e.target.classList.contains('star-epic') && !e.target.classList.contains('delete-epic') && !e.target.closest('.epic > div[onclick]')) {
-            startDragging(e, epic);
-        }
-    });
 }
 
 function startDragging(e, epic) {
@@ -226,9 +253,11 @@ function startDragging(e, epic) {
 
     document.onmouseup = () => {
         document.onmousemove = null;
+        document.onmouseup = null; // Ensure mouseup handler is removed
         if (visualEpic) {
             document.body.removeChild(visualEpic);
         }
+        // Save to update localStorage and ensure render is called
         saveAndRender();
     };
 
@@ -236,6 +265,7 @@ function startDragging(e, epic) {
 }
 
 function startResizing(e, epic) {
+    e.stopPropagation(); // Prevent event bubbling
     const startX = e.clientX;
     const initialWidth = epic.width * sprintWidth;
     const initialHeight = epic.resourceCount * rowHeight;
@@ -261,8 +291,10 @@ function startResizing(e, epic) {
         }
     };
 
-    document.onmouseup = () => document.onmousemove = null;
-    e.stopPropagation();
+    document.onmouseup = () => {
+        document.onmousemove = null;
+        document.onmouseup = null; // Ensure mouseup handler is removed
+    };
 }
 
 let isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
@@ -292,6 +324,7 @@ function updateLockAreaToggle() {
 updateLockAreaToggle();
 
 function startVerticalResizing(e, epic) {
+    e.stopPropagation(); // Prevent event bubbling
     const startY = e.clientY;
     const initialHeight = epic.resourceCount * rowHeight;
     const initialWidth = epic.width * sprintWidth;
@@ -317,8 +350,10 @@ function startVerticalResizing(e, epic) {
         }
     };
 
-    document.onmouseup = () => document.onmousemove = null;
-    e.stopPropagation();
+    document.onmouseup = () => {
+        document.onmousemove = null;
+        document.onmouseup = null; // Ensure mouseup handler is removed
+    };
 }
 
 function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, height = currentEpic?.resourceCount * rowHeight) {
@@ -503,7 +538,6 @@ if (typeof module !== 'undefined' && module.exports) {
     toggleStarEpic,
     deleteEpic,
     startEditingEpicName,
-    makeDraggable,
     startDragging,
     startResizing,
     startVerticalResizing,
