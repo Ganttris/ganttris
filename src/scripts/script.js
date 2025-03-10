@@ -1,28 +1,21 @@
-// Load project data from local storage or initialize an empty array
 let projectData = JSON.parse(localStorage.getItem('projectData')) || [];
 const rowHeight = 50;
 const sprintWidth = 120;
 const colors = ['#1a73e8', '#34a853', '#6B8E23', '#009688', '#9c27b0', '#4682B4'];
 
-// Load the highlight row from local storage or default to 1
 let highlightRow = parseInt(localStorage.getItem('highlightRow')) || 1;
 document.getElementById('highlightRowInput').value = highlightRow;
 
-// Update highlight row on input change and re-render
 document.getElementById('highlightRowInput').addEventListener('input', (e) => {
     highlightRow = parseInt(e.target.value) || 1;
     localStorage.setItem('highlightRow', highlightRow);
     render();
 });
 
-// Set up drag event for toolbar items
 document.querySelector('.toolbar-item').addEventListener('dragstart', (e) => {
     e.dataTransfer.setData('type', 'epic');
-
-    // Prevent the browser from dragging the toolbar button
     e.dataTransfer.setDragImage(new Image(), 0, 0);
 
-    // Create a visual epic object to follow the cursor
     const visualEpic = document.createElement('div');
     visualEpic.className = 'epic';
     visualEpic.style.position = 'absolute';
@@ -43,25 +36,21 @@ document.querySelector('.toolbar-item').addEventListener('dragstart', (e) => {
     }, { once: true });
 });
 
-// Prevent default behavior on dragover
 timeline.addEventListener('dragover', (e) => e.preventDefault());
 
-// Handle drop event to create a new epic
 timeline.addEventListener('drop', (e) => {
     if (e.dataTransfer.getData('type') === 'epic') {
         let left = snapToGrid(e.clientX + timeline.scrollLeft - timeline.getBoundingClientRect().left);
         let top = snapToRow(e.clientY - timeline.getBoundingClientRect().top);
         const color = colors[projectData.length % colors.length];
 
-        // Ensure the new epic drops in the same resource row and sprint column the mouse pointer is hovering over
         const rowIndex = Math.floor((e.clientY - timeline.getBoundingClientRect().top) / rowHeight);
         const colIndex = Math.floor((e.clientX + timeline.scrollLeft - timeline.getBoundingClientRect().left) / sprintWidth);
         top = rowIndex * rowHeight;
         left = colIndex * sprintWidth;
 
-        // Check for overlap and adjust position if necessary
         if (checkOverlap(null, left, top, sprintWidth, rowHeight)) {
-            const adjustment = 10; // Adjust by 10 pixels
+            const adjustment = 10;
             let adjusted = false;
 
             for (let dx = -adjustment; dx <= adjustment; dx += adjustment) {
@@ -82,18 +71,16 @@ timeline.addEventListener('drop', (e) => {
             }
         }
 
-        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 1, resourceCount: 1, color, starred: false }); // Default width to 1 sprint and resource count to 1
+        projectData.push({ id: Date.now(), name: 'New Epic', left, top, width: 1, resourceCount: 1, color, starred: false });
         saveAndRender();
     }
 });
 
-// Save project data to local storage and re-render
 function saveAndRender() {
     localStorage.setItem('projectData', JSON.stringify(projectData));
     render();
 }
 
-// Clear the timeline and reset settings
 function clearTimeline() {
     projectData = [];
     localStorage.removeItem('pageTitle');
@@ -106,17 +93,14 @@ function clearTimeline() {
     pageTitleElement.style.color = '#B0B0B0';
 }
 
-// Snap value to the nearest grid line
 function snapToGrid(value) {
     return Math.round(value / sprintWidth) * sprintWidth;
 }
 
-// Snap value to the nearest row
 function snapToRow(value) {
     return Math.round(value / rowHeight) * rowHeight;
 }
 
-// Render the timeline and epics
 function render() {
     timeline.innerHTML = '<div class="timeline-grid"></div>';
     drawResourceRows();
@@ -124,7 +108,6 @@ function render() {
     drawSprintGrid();
 }
 
-// Draw resource rows on the timeline
 function drawResourceRows() {
     const timelineWidth = 26 * sprintWidth;
     for (let i = 0; i < 50; i++) {
@@ -138,11 +121,10 @@ function drawResourceRows() {
     const resourceLine = document.createElement('div');
     resourceLine.className = 'resource-line';
     resourceLine.style.top = `${highlightRow * rowHeight - 2}px`;
-    resourceLine.style.width = `${timeline.scrollWidth}px`; // Ensure the red line spans the full width of the timeline
+    resourceLine.style.width = `${timeline.scrollWidth}px`;
     timeline.appendChild(resourceLine);
 }
 
-// Create an epic element
 function createEpicElement(epic) {
     const epicEl = document.createElement('div');
     epicEl.className = 'epic';
@@ -166,20 +148,17 @@ function createEpicElement(epic) {
     return epicEl;
 }
 
-// Toggle the star status of an epic
 function toggleStarEpic(epicId) {
     const epic = projectData.find(e => e.id === epicId);
     epic.starred = !epic.starred;
     saveAndRender();
 }
 
-// Delete an epic by ID
 function deleteEpic(epicId) {
     projectData = projectData.filter(epic => epic.id !== epicId);
     saveAndRender();
 }
 
-// Start editing the name of an epic
 function startEditingEpicName(epicId) {
     const epic = projectData.find(e => e.id === epicId);
     const newName = prompt("Edit Epic Name:", epic.name);
@@ -189,7 +168,6 @@ function startEditingEpicName(epicId) {
     }
 }
 
-// Make an element draggable
 function makeDraggable(element, epic) {
     element.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('resize-handle')) {
@@ -202,7 +180,6 @@ function makeDraggable(element, epic) {
     });
 }
 
-// Start dragging an epic
 function startDragging(e, epic) {
     e.preventDefault();
     const offsetX = e.clientX - e.target.getBoundingClientRect().left;
@@ -222,7 +199,7 @@ function startDragging(e, epic) {
         if (!checkOverlap(epic, newLeft, newTop, epic.width * sprintWidth, epic.resourceCount * rowHeight)) {
             epic.left = newLeft;
             epic.top = newTop;
-            render(); // Update the position visually during dragging
+            render();
             if (visualEpic) {
                 document.body.removeChild(visualEpic);
                 visualEpic = null;
@@ -232,7 +209,6 @@ function startDragging(e, epic) {
             if (!isDragging || !isBlocked) {
                 isDragging = true;
                 isBlocked = true;
-                // Create a visual epic object to follow the cursor
                 visualEpic = document.createElement('div');
                 visualEpic.className = 'epic';
                 visualEpic.style.position = 'absolute';
@@ -253,14 +229,12 @@ function startDragging(e, epic) {
         if (visualEpic) {
             document.body.removeChild(visualEpic);
         }
-        saveAndRender(); // Save the final position after dragging
+        saveAndRender();
     };
 
-    // Prevent the visual representation from flashing below the timeline
     e.stopPropagation();
 }
 
-// Start resizing an epic horizontally
 function startResizing(e, epic) {
     const startX = e.clientX;
     const initialWidth = epic.width * sprintWidth;
@@ -291,7 +265,6 @@ function startResizing(e, epic) {
     e.stopPropagation();
 }
 
-// Toggle the lock area state
 let isLockAreaEnabled = JSON.parse(localStorage.getItem('isLockAreaEnabled')) || false;
 
 function toggleLockArea() {
@@ -300,7 +273,6 @@ function toggleLockArea() {
     updateLockAreaToggle();
 }
 
-// Update the lock area toggle button
 function updateLockAreaToggle() {
     const lockAreaToggle = document.getElementById('lock-effort-toggle');
     const icon = lockAreaToggle.querySelector('i');
@@ -319,7 +291,6 @@ function updateLockAreaToggle() {
 
 updateLockAreaToggle();
 
-// Start resizing an epic vertically
 function startVerticalResizing(e, epic) {
     const startY = e.clientY;
     const initialHeight = epic.resourceCount * rowHeight;
@@ -350,7 +321,6 @@ function startVerticalResizing(e, epic) {
     e.stopPropagation();
 }
 
-// Check if an epic overlaps with others
 function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprintWidth, height = currentEpic?.resourceCount * rowHeight) {
     return projectData.some(epic =>
         epic.id !== currentEpic?.id &&
@@ -363,7 +333,6 @@ function checkOverlap(currentEpic, left, top, width = currentEpic?.width * sprin
     );
 }
 
-// Draw the sprint grid on the timeline
 function drawSprintGrid() {
     const grid = document.querySelector('.timeline-grid');
     grid.innerHTML = '';
@@ -381,7 +350,6 @@ function drawSprintGrid() {
     }
 }
 
-// Load the saved title from local storage
 const savedTitle = localStorage.getItem('pageTitle');
 const pageTitleElement = document.getElementById('page-title');
 if (savedTitle && savedTitle !== "My Project") {
@@ -392,14 +360,12 @@ if (savedTitle && savedTitle !== "My Project") {
     pageTitleElement.style.color = '#B0B0B0';
 }
 
-// Prevent the title from expanding vertically when hitting "Enter"
 pageTitleElement.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
     }
 });
 
-// Save the title to local storage when it is edited
 pageTitleElement.addEventListener('input', (e) => {
     const title = e.target.innerText.trim();
     if (title && title !== "My Project") {
@@ -412,7 +378,6 @@ pageTitleElement.addEventListener('input', (e) => {
     }
 });
 
-// Function to download project data
 function downloadData() {
     const data = {
         projectData,
@@ -428,7 +393,6 @@ function downloadData() {
     downloadAnchorNode.remove();
 }
 
-// Function to upload project data
 function uploadData(event) {
     const file = event.target.files[0];
     if (file) {
@@ -455,12 +419,10 @@ function uploadData(event) {
     }
 }
 
-// Function to automatically arrange epics to minimize empty space
 function arrangeEpics() {
     const maxResources = parseInt(document.getElementById('highlightRowInput').value) || 1;
-    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false)); // Track occupied cells
+    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false));
 
-    // Sort epics by starred status and then by size
     projectData.sort((a, b) => {
         if (a.starred !== b.starred) {
             return b.starred - a.starred;
@@ -489,7 +451,6 @@ function arrangeEpics() {
     saveAndRender();
 }
 
-// Check if an epic can be placed at the specified row and column
 function canPlaceEpic(epic, row, col, occupied) {
     for (let r = row; r < row + epic.resourceCount; r++) {
         for (let c = col; c < col + epic.width; c++) {
@@ -501,7 +462,6 @@ function canPlaceEpic(epic, row, col, occupied) {
     return true;
 }
 
-// Place an epic at the specified row and column
 function placeEpic(epic, row, col, occupied) {
     epic.left = col * sprintWidth;
     epic.top = row * rowHeight;
@@ -513,10 +473,9 @@ function placeEpic(epic, row, col, occupied) {
     }
 }
 
-// Compact the epics vertically to eliminate empty vertical space
 function compactEpicsVertically() {
     const maxResources = parseInt(document.getElementById('highlightRowInput').value) || 1;
-    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false)); // Track occupied cells
+    const occupied = Array(maxResources).fill(0).map(() => Array(26).fill(false));
 
     projectData.forEach(epic => {
         let found = false;
@@ -532,8 +491,51 @@ function compactEpicsVertically() {
     });
 }
 
-// Add event listener for the arrange button
 document.getElementById('arrangeButton').addEventListener('click', arrangeEpics);
 
-// Initial render of the timeline
 saveAndRender();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    saveAndRender,
+    render,
+    clearTimeline,
+    toggleStarEpic,
+    deleteEpic,
+    startEditingEpicName,
+    makeDraggable,
+    startDragging,
+    startResizing,
+    startVerticalResizing,
+    checkOverlap,
+    snapToGrid,
+    snapToRow,
+    drawResourceRows,
+    drawSprintGrid,
+    createEpicElement,
+    downloadData,
+    uploadData,
+    arrangeEpics,
+    canPlaceEpic,
+    placeEpic,
+    compactEpicsVertically,
+    toggleLockArea,
+    updateLockAreaToggle
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.saveAndRender = saveAndRender;
+  window.render = render;
+  window.clearTimeline = clearTimeline;
+  window.toggleStarEpic = toggleStarEpic;
+  window.deleteEpic = deleteEpic;
+  window.startEditingEpicName = startEditingEpicName;
+  window.checkOverlap = checkOverlap;
+  window.snapToGrid = snapToGrid;
+  window.snapToRow = snapToRow;
+  window.arrangeEpics = arrangeEpics;
+  window.toggleLockArea = toggleLockArea;
+  window.downloadData = downloadData;
+  window.uploadData = uploadData;
+}

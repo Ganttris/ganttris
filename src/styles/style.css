@@ -194,6 +194,12 @@ footer {
     right: 0; 
     width: 100%; 
     border-top: 1px solid #44475a;
+    pointer-events: none; /* Allow clicking through the footer */
+}
+
+/* But allow clicking on the footer content itself */
+footer * {
+    pointer-events: auto;
 }
 
 .resource-line {
